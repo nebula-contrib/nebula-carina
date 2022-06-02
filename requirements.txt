@@ -1,0 +1,2 @@
+fastapi==0.78.0
+nebula3-python==3.1.0
