@@ -1,13 +1,19 @@
 from fastapi import FastAPI
 
-from graph.connection import run_ngql
+from graph.ngql.space import use_space, create_space, VidTypeEnum
 
 app = FastAPI()
 
 
 @app.get("/")
 async def root():
-    run_ngql('USE blog;')
+    # run_ngql('SHOW SPACES;')
+    # print(show_spaces())
+    print(use_space('main'))
+    # result = create_space('main', VidTypeEnum.INT64)
+    # print(result)
+    # if result.error_code() < 0:
+    #     print(result.error_msg())
     return {"message": "Hello World"}
 
 
