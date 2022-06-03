@@ -1,4 +1,8 @@
+from datetime import datetime
+
 from graph.models import models, fields
+
+PREFIX = ''
 
 
 class Figure(models.TagModel):
@@ -13,4 +17,4 @@ class Source(models.TagModel):
 
 
 class Belong(models.EdgeTypeModel):
-    pass
+    created_on: datetime = fields.DateTimeField(..., )

@@ -1,5 +1,3 @@
-from nebula3.data.ResultSet import ResultSet
-
 from graph.ngql.connection import run_ngql
 from enum import Enum
 
