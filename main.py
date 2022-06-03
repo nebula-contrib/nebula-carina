@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from db.models import Figure
+from example.models import Figure
 from graph.ngql.space import use_space, create_space, VidTypeEnum
 
 app = FastAPI()
