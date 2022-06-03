@@ -22,5 +22,5 @@ def create_tag(
              f'{" TTL_DURATION" if ttl_duration else ""}{" TTL_COL" if ttl_col else ""}')
 
 
-def drop_tag(tag_name, if_exists=True):
+def drop_tag(tag_name: str, if_exists: bool = True):
     run_ngql(f'DROP TAG{" IF EXISTS" if if_exists else ""} {tag_name}')
