@@ -3,7 +3,7 @@ from typing import Union, Any, Optional, TYPE_CHECKING, Type
 
 from pydantic.fields import Undefined, FieldInfo
 from pydantic.typing import NoArgAnyCallable
-from graph.ngql.data_types import DataType
+from graph.ngql.data_types import DataType, FixedString
 from graph.ngql.field import NebulaDatabaseField
 
 if TYPE_CHECKING:
@@ -56,6 +56,8 @@ def create_nebula_field(
         repr: bool = True,
         **extra: Any,
 ):
+    if isinstance(data_type, FixedString) and not max_length:
+        max_length = data_type.max_length
     field_info = NebulaFieldInfo(
         data_type,
         default,
