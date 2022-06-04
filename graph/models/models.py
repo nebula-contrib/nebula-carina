@@ -3,8 +3,8 @@ from enum import Enum
 from pydantic import BaseModel
 
 from graph.models.fields import NebulaFieldInfo
-from graph.ngql.tag import create_tag_ngql, TtlDefinition, describe_tag, alter_tag, alter_tag_ngql, AlterDefinition, \
-    AlterDefinitionType
+from graph.ngql.schema import TtlDefinition, AlterDefinition, \
+    AlterDefinitionType, create_schema_ngql, SchemaType, describe_schema, alter_schema_ngql
 from graph.utils.utils import pascal_case_to_snake_case
 
 
@@ -22,20 +22,21 @@ class NebulaModel(BaseModel):
         return pascal_case_to_snake_case(cls.__name__)
 
     @classmethod
-    def create_ngql(cls):
-        raise NotImplementedError
+    def get_schema_type(cls) -> SchemaType:
+        schema_type = None
+        if issubclass(cls, TagModel):
+            schema_type = SchemaType.TAG
+        elif issubclass(cls, EdgeTypeModel):
+            schema_type = SchemaType.EDGE
+        assert schema_type
+        return schema_type
 
-    @classmethod
-    def alter_ngql(cls):
-        raise NotImplementedError
-
-
-class TagModel(NebulaModel):
     @classmethod
     def create_ngql(cls):
         db_fields = cls._make_db_fields()
         meta_cls = getattr(cls, 'Meta', None)
-        return create_tag_ngql(
+        return create_schema_ngql(
+            cls.get_schema_type(),
             cls.db_name(), db_fields,
             ttl_definition=TtlDefinition(meta_cls.ttl_duration, meta_cls.ttl_col)
             if meta_cls and getattr(meta_cls, 'ttl_duration', None) else None
@@ -44,7 +45,7 @@ class TagModel(NebulaModel):
     @classmethod
     def alter_ngql(cls):
         # TODO ttl
-        from_dict = {db_field.prop_name: db_field for db_field in describe_tag(cls.db_name())}
+        from_dict = {db_field.prop_name: db_field for db_field in describe_schema(cls.get_schema_type(), cls.db_name())}
         to_dict = {db_field.prop_name: db_field for db_field in cls._make_db_fields()}
         adds, drop_names, changes = [], [], []
         for name, db_field in to_dict.items():
@@ -63,8 +64,12 @@ class TagModel(NebulaModel):
                 alter_definitions.append(AlterDefinition(AlterDefinitionType.CHANGE, properties=changes))
             if drop_names:
                 alter_definitions.append(AlterDefinition(AlterDefinitionType.DROP, prop_names=drop_names))
-            return alter_tag_ngql(cls.db_name(), alter_definitions=alter_definitions)
+            return alter_schema_ngql(cls.get_schema_type(), cls.db_name(), alter_definitions=alter_definitions)
         return None
+
+
+class TagModel(NebulaModel):
+    pass
 
 
 class EdgeTypeModel(NebulaModel):

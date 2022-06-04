@@ -2,8 +2,6 @@ from graph.models import models
 from graph.models.fields import create_nebula_field as _
 from graph.ngql import data_types
 
-PREFIX = ''
-
 
 class Figure(models.TagModel):
     vid: int = _(data_types.Int64, ..., )
@@ -22,5 +20,5 @@ class Source(models.TagModel):
     name: str = _(data_types.FixedString(30), ..., )
 
 
-# class Belong(models.EdgeTypeModel):
-#     created_on: datetime = NebulaField(..., )
+class Belong(models.EdgeTypeModel):
+    pass
