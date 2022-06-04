@@ -5,7 +5,7 @@ class DataType(object):
     __slots__ = tuple()
 
     def __str__(self):
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class NumberType(Enum):
