@@ -16,7 +16,7 @@ async def root():
     # print(result)
     # if result.error_code() < 0:
     #     print(result.error_msg())
-    f = Figure(vid=1000, name='xxx')
+    f = Figure(vid=1000, name='xxx', age=22)
     return f
 
 

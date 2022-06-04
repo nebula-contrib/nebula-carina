@@ -17,8 +17,7 @@ def show_tags() -> list[str]:
 
 
 def describe_tag(tag_name: str):
-    result = run_ngql(f'DESCRIBE TAG {tag_name};')
-    return result
+    return run_ngql(f'DESCRIBE TAG {tag_name};')
 
 
 class TtlDefinition(SubTaskDefinition):
@@ -32,18 +31,27 @@ class TtlDefinition(SubTaskDefinition):
         return f'TTL_DURATION = {self.ttl_duration}{f", TTL_COL = {self.ttl_col}" if self.ttl_col else ""}'
 
 
-def create_tag(
-        tag_name: str, properties: list[NebulaDatabaseField], if_not_exists: bool = True,
+def create_tag_ngql(
+        tag_name: str, properties: list[NebulaDatabaseField], *, if_not_exists: bool = True,
         ttl_definition: Optional[TtlDefinition] = None
 ):
-    run_ngql(
-        f'CREATE TAG{" IF NOT EXISTS" if if_not_exists else ""} '
-        f'{tag_name}({", ".join(str(p) for p in properties)}) {str(ttl_definition) if ttl_definition else ""};'
-    )
+    return f'CREATE TAG{" IF NOT EXISTS" if if_not_exists else ""} ' \
+           f'{tag_name}({", ".join(str(p) for p in properties)}) {str(ttl_definition) if ttl_definition else ""};'
 
 
-def drop_tag(tag_name: str, if_exists: bool = True):
-    run_ngql(f'DROP TAG{" IF EXISTS" if if_exists else ""} {tag_name};')
+def create_tag(
+        tag_name: str, properties: list[NebulaDatabaseField], *, if_not_exists: bool = True,
+        ttl_definition: Optional[TtlDefinition] = None
+):
+    run_ngql(create_tag_ngql(tag_name, properties, if_not_exists=if_not_exists, ttl_definition=ttl_definition))
+
+
+def drop_tag_ngql(tag_name: str, *, if_exists: bool = True):
+    return f'DROP TAG{" IF EXISTS" if if_exists else ""} {tag_name};'
+
+
+def drop_tag(tag_name: str, *, if_exists: bool = True):
+    run_ngql(drop_tag_ngql(tag_name, if_exists=if_exists))
 
 
 class AlterDefinitionType(Enum):
@@ -73,16 +81,24 @@ class AlterDefinition(SubTaskDefinition):
         return f'{self.alter_definition_type.value} ({", ".join(str(p) for p in self.properties)})'
 
 
-def alter_tag(
+def alter_tag_ngql(
         tag_name: str,
+        *,
         alter_definitions: Optional[list[AlterDefinition]] = None,
         ttl_definition: Optional[TtlDefinition] = None
 ):
     assert alter_definitions or ttl_definition
-    run_ngql(
-        f'ALTER TAG {tag_name} {", ".join(str(a) for a in alter_definitions) if alter_definitions else ""}'
-        f'{str(ttl_definition) if ttl_definition else ""};'
-    )
+    return f'ALTER TAG {tag_name} {", ".join(str(a) for a in alter_definitions) if alter_definitions else ""}' \
+           f'{str(ttl_definition) if ttl_definition else ""};'
+
+
+def alter_tag(
+        tag_name: str,
+        *,
+        alter_definitions: Optional[list[AlterDefinition]] = None,
+        ttl_definition: Optional[TtlDefinition] = None
+):
+    run_ngql(alter_tag_ngql(tag_name, alter_definitions=alter_definitions, ttl_definition=ttl_definition))
 
 
 def delete_tag(tag_names: list[str], vid: str | int):

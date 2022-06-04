@@ -1,22 +1,31 @@
 from functools import partial
-from typing import Union, Any, Optional, TYPE_CHECKING
+from typing import Union, Any, Optional, TYPE_CHECKING, Type
 
 from pydantic.fields import Undefined, FieldInfo
 from pydantic.typing import NoArgAnyCallable
+from graph.ngql.data_types import DataType
+from graph.ngql.field import NebulaDatabaseField
+
 if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, MappingIntStrAny
 
 
 class NebulaFieldInfo(FieldInfo):
-    __slots__ = ('field_type', )
+    __slots__ = ('data_type', )
 
-    def __init__(self, field_type, default: Any = Undefined, **kwargs: Any) -> None:
+    def __init__(self, data_type: Union[DataType, Type[DataType]], default: Any = Undefined, **kwargs: Any) -> None:
         super().__init__(default, **kwargs)
-        self.field_type = field_type
+        if isinstance(data_type, DataType):
+            self.data_type = data_type
+        else:
+            self.data_type = data_type()
+
+    # def create_db_field(self, field_name):
+    #     NebulaDatabaseField(field_name, )
 
 
-def nebula_field(
-            field_type,
+def NebulaField(
+            data_type: Union[DataType, Type[DataType]],
             default: Any = Undefined,
             *,
             default_factory: Optional[NoArgAnyCallable] = None,
@@ -45,7 +54,7 @@ def nebula_field(
             **extra: Any,
 ):
     field_info = NebulaFieldInfo(
-        field_type,
+        data_type,
         default,
         default_factory=default_factory,
         alias=alias,
@@ -74,25 +83,3 @@ def nebula_field(
     )
     field_info._validate()
     return field_info
-
-
-VIDField = partial(nebula_field, 'vid')
-
-
-NumberField = partial(nebula_field, 'number')
-
-
-BoolField = partial(nebula_field, 'bool')
-
-
-StringField = partial(nebula_field, 'string')
-
-
-DateField = partial(nebula_field, 'date')
-
-
-DateTimeField = partial(nebula_field, 'datetime')
-
-
-TimeField = partial(nebula_field, 'time')
-

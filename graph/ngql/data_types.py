@@ -27,6 +27,36 @@ class Number(DataType):
         return self.number_type.value
 
 
+class Int64(Number):
+    def __init__(self):
+        super().__init__(NumberType.INT64)
+
+
+class Int32(Number):
+    def __init__(self):
+        super().__init__(NumberType.INT32)
+
+
+class Int16(Number):
+    def __init__(self):
+        super().__init__(NumberType.INT16)
+
+
+class Int8(Number):
+    def __init__(self):
+        super().__init__(NumberType.INT8)
+
+
+class Float(Number):
+    def __init__(self):
+        super().__init__(NumberType.FLOAT)
+
+
+class Double(Number):
+    def __init__(self):
+        super().__init__(NumberType.DOUBLE)
+
+
 class StringType(Enum):
     FIXED_STRING = 'FIXED_STRING'
     STRING = 'STRING'
