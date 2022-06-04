@@ -9,6 +9,7 @@ class DatabaseSettings(BaseSettings):
     user_name: str
     password: str
     default_space: str = 'main'
+    model_paths: Set[str] = set()
 
     class Config:
         env_prefix = 'nebula_'

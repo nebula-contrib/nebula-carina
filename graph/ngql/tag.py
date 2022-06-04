@@ -14,7 +14,7 @@ class SubTaskDefinition(object):
 
 
 def show_tags() -> list[str]:
-    return run_ngql('SHOW TAGS;').column_values('Name')
+    return [i.as_string() for i in run_ngql('SHOW TAGS;').column_values('Name')]
 
 
 def describe_tag(tag_name: str) -> list[NebulaDatabaseField]:

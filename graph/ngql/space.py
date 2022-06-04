@@ -12,7 +12,7 @@ class VidTypeEnum(Enum):
 
 
 def show_spaces() -> list[str]:
-    return run_ngql('SHOW SPACES;').column_values('Name')
+    return [i.as_string() for i in run_ngql('SHOW SPACES;').column_values('Name')]
 
 
 def create_space(name: str, vid_type: VidTypeEnum):

@@ -18,31 +18,33 @@ class NebulaModel(BaseModel):
         ]
 
     @classmethod
-    def _create_tag(cls):
+    def db_name(cls):
+        return pascal_case_to_snake_case(cls.__name__)
+
+    @classmethod
+    def create_ngql(cls):
         raise NotImplementedError
 
     @classmethod
-    def _alter_tag(cls):
+    def alter_ngql(cls):
         raise NotImplementedError
 
 
 class TagModel(NebulaModel):
     @classmethod
-    def _create_tag(cls):
+    def create_ngql(cls):
         db_fields = cls._make_db_fields()
-        tag_name = pascal_case_to_snake_case(cls.__name__)
-        meta_cls = getattr(cls, 'Meta')
+        meta_cls = getattr(cls, 'Meta', None)
         return create_tag_ngql(
-            tag_name, db_fields,
+            cls.db_name(), db_fields,
             ttl_definition=TtlDefinition(meta_cls.ttl_duration, meta_cls.ttl_col)
-            if meta_cls and getattr(meta_cls, 'ttl_duration') else None
+            if meta_cls and getattr(meta_cls, 'ttl_duration', None) else None
         )
 
     @classmethod
-    def _alter_tag(cls):
+    def alter_ngql(cls):
         # TODO ttl
-        tag_name = pascal_case_to_snake_case(cls.__name__)
-        from_dict = {db_field.prop_name: db_field for db_field in describe_tag(tag_name)}
+        from_dict = {db_field.prop_name: db_field for db_field in describe_tag(cls.db_name())}
         to_dict = {db_field.prop_name: db_field for db_field in cls._make_db_fields()}
         adds, drop_names, changes = [], [], []
         for name, db_field in to_dict.items():
@@ -61,15 +63,9 @@ class TagModel(NebulaModel):
                 alter_definitions.append(AlterDefinition(AlterDefinitionType.CHANGE, properties=changes))
             if drop_names:
                 alter_definitions.append(AlterDefinition(AlterDefinitionType.DROP, prop_names=drop_names))
-            return alter_tag_ngql(tag_name, alter_definitions=alter_definitions)
+            return alter_tag_ngql(cls.db_name(), alter_definitions=alter_definitions)
         return None
 
 
 class EdgeTypeModel(NebulaModel):
-    @classmethod
-    def _create_tag(cls):
-        raise NotImplementedError
-
-    @classmethod
-    def _alter_tag(cls):
-        raise NotImplementedError
+    pass
