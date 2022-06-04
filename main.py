@@ -19,7 +19,7 @@ async def root():
     f = Figure(vid=1000, name='xxx', age=22)
     # print(Figure._construct_tag())
     # run_ngql(Figure._construct_tag())
-    Figure.analyse_structure()
+    print(Figure._alter_tag())
     return f
 
 

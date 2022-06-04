@@ -7,10 +7,10 @@ PREFIX = ''
 
 class Figure(models.TagModel):
     vid: int = _(data_types.Int64, ..., )
-    name: str = _(data_types.FixedString(40), ..., max_length=40, )
-    age: int = _(data_types.Int8, ..., )
-    is_male: bool = _(data_types.Bool, True)
+    name: str = _(data_types.FixedString(30), ..., max_length=30, )
+    age: int = _(data_types.Int16, ..., )
     valid_until: int = _(data_types.Int64, None, )
+    is_virtual: bool = _(data_types.Bool, True)
 
     class Meta:
         ttl_duration = 100

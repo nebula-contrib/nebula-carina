@@ -16,6 +16,14 @@ class NebulaDatabaseField(object):
         self.default = default
         self.comment = comment
 
+    def __eq__(self, other):
+        if not isinstance(other, NebulaDatabaseField):
+            return False
+        return (
+            self.prop_name == other.prop_name and self.data_type == other.data_type
+            and self.nullable == other.nullable and self.default == other.default and self.comment == other.comment
+        )
+
     def __repr__(self):
         return self.__str__()
 

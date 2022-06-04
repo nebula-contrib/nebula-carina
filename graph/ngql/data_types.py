@@ -18,6 +18,9 @@ class DataType(object, metaclass=DataTypeMetaClass):
     def __str__(self):
         return pascal_case_to_snake_case(self.__class__.__name__).upper()
 
+    def __eq__(self, other):
+        return type(self) == type(other)
+
 
 class Int64(DataType):
     pass
@@ -52,10 +55,15 @@ class FixedString(DataType):
 
     def __init__(self, max_length):
         super().__init__()
-        self.max_length = max_length
+        self.max_length = int(max_length)
 
     def __str__(self):
         return f'{super().__str__()}({self.max_length})'
+
+    def __eq__(self, other):
+        if not isinstance(other, FixedString):
+            return False
+        return self.max_length == other.max_length
 
 
 class Bool(DataType):

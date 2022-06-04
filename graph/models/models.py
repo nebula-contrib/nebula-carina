@@ -3,19 +3,13 @@ from enum import Enum
 from pydantic import BaseModel
 
 from graph.models.fields import NebulaFieldInfo
-from graph.ngql.field import NebulaDatabaseField
-from graph.ngql.tag import create_tag_ngql, TtlDefinition, show_tags, describe_tag
+from graph.ngql.tag import create_tag_ngql, TtlDefinition, describe_tag, alter_tag, alter_tag_ngql, AlterDefinition, \
+    AlterDefinitionType
 from graph.utils.utils import pascal_case_to_snake_case
 
 
 class NebulaModel(BaseModel):
 
-    @classmethod
-    def _construct(cls):
-        raise NotImplementedError
-
-
-class TagModel(NebulaModel):
     @classmethod
     def _make_db_fields(cls):
         return [
@@ -24,7 +18,17 @@ class TagModel(NebulaModel):
         ]
 
     @classmethod
-    def _construct_tag(cls):
+    def _create_tag(cls):
+        raise NotImplementedError
+
+    @classmethod
+    def _alter_tag(cls):
+        raise NotImplementedError
+
+
+class TagModel(NebulaModel):
+    @classmethod
+    def _create_tag(cls):
         db_fields = cls._make_db_fields()
         tag_name = pascal_case_to_snake_case(cls.__name__)
         meta_cls = getattr(cls, 'Meta')
@@ -35,18 +39,37 @@ class TagModel(NebulaModel):
         )
 
     @classmethod
-    def _compare_and_alter(cls):
-        pass
-
-    @classmethod
-    def analyse_structure(cls):
+    def _alter_tag(cls):
+        # TODO ttl
         tag_name = pascal_case_to_snake_case(cls.__name__)
-        tag_info = describe_tag(tag_name)
-        return tag_info
+        from_dict = {db_field.prop_name: db_field for db_field in describe_tag(tag_name)}
+        to_dict = {db_field.prop_name: db_field for db_field in cls._make_db_fields()}
+        adds, drop_names, changes = [], [], []
+        for name, db_field in to_dict.items():
+            if name not in from_dict:
+                adds.append(db_field)
+            elif db_field != from_dict[name]:
+                changes.append(db_field)
+        for name, db_field in from_dict.items():
+            if name not in to_dict:
+                drop_names.append(name)
+        if adds or drop_names or changes:
+            alter_definitions = []
+            if adds:
+                alter_definitions.append(AlterDefinition(AlterDefinitionType.ADD, properties=adds))
+            if changes:
+                alter_definitions.append(AlterDefinition(AlterDefinitionType.CHANGE, properties=changes))
+            if drop_names:
+                alter_definitions.append(AlterDefinition(AlterDefinitionType.DROP, prop_names=drop_names))
+            return alter_tag_ngql(tag_name, alter_definitions=alter_definitions)
+        return None
 
 
 class EdgeTypeModel(NebulaModel):
+    @classmethod
+    def _create_tag(cls):
+        raise NotImplementedError
 
     @classmethod
-    def _construct(cls):
-        pass
+    def _alter_tag(cls):
+        raise NotImplementedError
