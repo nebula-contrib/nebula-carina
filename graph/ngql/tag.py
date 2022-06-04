@@ -29,7 +29,7 @@ class TtlDefinition(SubTaskDefinition):
         self.ttl_col = ttl_col
 
     def __str__(self):
-        return f'{"TTL_DURATION" if self.ttl_duration else ""}{", TTL_COL" if self.ttl_col else ""};'
+        return f'TTL_DURATION = {self.ttl_duration}{f", TTL_COL = {self.ttl_col}" if self.ttl_col else ""}'
 
 
 def create_tag(
@@ -70,7 +70,7 @@ class AlterDefinition(SubTaskDefinition):
     def __str__(self):
         if self.alter_definition_type == AlterDefinitionType.DROP:
             return f'{self.alter_definition_type.value} ({",".join(self.prop_names)})'
-        return f'{self.alter_definition_type.value}({", ".join(str(p) for p in self.properties)})'
+        return f'{self.alter_definition_type.value} ({", ".join(str(p) for p in self.properties)})'
 
 
 def alter_tag(
