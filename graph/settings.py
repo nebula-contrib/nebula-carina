@@ -8,6 +8,7 @@ class DatabaseSettings(BaseSettings):
     servers: Set[str] = set()
     user_name: str
     password: str
+    default_space: str = 'main'
 
     class Config:
         env_prefix = 'nebula_'

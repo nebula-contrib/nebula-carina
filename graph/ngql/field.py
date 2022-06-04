@@ -16,6 +16,9 @@ class NebulaDatabaseField(object):
         self.default = default
         self.comment = comment
 
+    def __repr__(self):
+        return self.__str__()
+
     def __str__(self):
         return f'{self.prop_name} {self.data_type} {"NULL" if self.nullable else "NOT NULL"}' \
                f'{f" DEFAULT {self.default}" if self.default is not None else ""}' \

@@ -1,6 +1,8 @@
 from graph.ngql.connection import run_ngql
 from enum import Enum
 
+from graph.settings import database_settings
+
 
 class VidTypeEnum(Enum):
     INT64 = 'INT64'
@@ -19,3 +21,6 @@ def create_space(name: str, vid_type: VidTypeEnum):
 
 def use_space(name):
     run_ngql(f'USE {name};')
+
+
+use_space(database_settings.default_space)

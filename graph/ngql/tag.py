@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Optional
 
 from graph.ngql.connection import run_ngql
+from graph.ngql.data_types import string_to_data_type
 from graph.ngql.field import NebulaDatabaseField
 
 
@@ -16,19 +17,32 @@ def show_tags() -> list[str]:
     return run_ngql('SHOW TAGS;').column_values('Name')
 
 
-def describe_tag(tag_name: str):
-    return run_ngql(f'DESCRIBE TAG {tag_name};')
+def describe_tag(tag_name: str) -> list[NebulaDatabaseField]:
+    tag_info = run_ngql(f'DESCRIBE TAG {tag_name};')
+    keys = tag_info.keys()
+    fields = []
+    for row in tag_info.rows():
+        dic = {
+            keys[i]: str(v.value, encoding='utf-8') if isinstance(v.value, bytes) else v.value
+            for i, v in enumerate(row.values)
+        }
+        fields.append(NebulaDatabaseField(
+            dic['Field'], string_to_data_type(dic['Type']), nullable=dic['Null'] == 'YES',
+            default=dic['Default'], comment=dic['Comment']
+        ))
+    return fields
 
 
 class TtlDefinition(SubTaskDefinition):
     __slots__ = ('ttl_duration', 'ttl_col')
 
-    def __init__(self, ttl_duration: int, ttl_col: Optional[str]):
+    def __init__(self, ttl_duration: int, ttl_col: str):
         self.ttl_duration = ttl_duration
         self.ttl_col = ttl_col
 
     def __str__(self):
-        return f'TTL_DURATION = {self.ttl_duration}{f", TTL_COL = {self.ttl_col}" if self.ttl_col else ""}'
+        ttl_col = f', TTL_COL = "{self.ttl_col}"' if self.ttl_col else ''
+        return f'TTL_DURATION = {self.ttl_duration}{ttl_col}'
 
 
 def create_tag_ngql(

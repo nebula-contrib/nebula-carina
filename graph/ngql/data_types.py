@@ -1,86 +1,79 @@
-from enum import Enum
+from abc import ABC
+
+from graph.utils.utils import pascal_case_to_snake_case
+
+data_type_factory = {}
 
 
-class DataType(object):
+class DataTypeMetaClass(type):
+    def __init__(cls, classname, superclasses, attributedict):
+        super().__init__(classname, superclasses, attributedict)
+        if cls.__name__ != 'DataType':
+            data_type_factory[pascal_case_to_snake_case(cls.__name__).upper()] = cls
+
+
+class DataType(object, metaclass=DataTypeMetaClass):
     __slots__ = tuple()
 
     def __str__(self):
-        raise NotImplementedError
+        return pascal_case_to_snake_case(self.__class__.__name__).upper()
 
 
-class NumberType(Enum):
-    INT64 = 'INT64'
-    INT32 = 'INT32'
-    INT16 = 'INT16'
-    INT8 = 'INT8'
-    FLOAT = 'FLOAT'
-    DOUBLE = 'DOUBLE'
+class Int64(DataType):
+    pass
 
 
-class Number(DataType):
-    __slots__ = ('number_type', )
-
-    def __init__(self, number_type: NumberType = NumberType.INT64):
-        self.number_type = number_type
-
-    def __str__(self):
-        return self.number_type.value
+class Int32(DataType):
+    pass
 
 
-class Int64(Number):
-    def __init__(self):
-        super().__init__(NumberType.INT64)
+class Int16(DataType):
+    pass
 
 
-class Int32(Number):
-    def __init__(self):
-        super().__init__(NumberType.INT32)
+class Int8(DataType):
+    pass
 
 
-class Int16(Number):
-    def __init__(self):
-        super().__init__(NumberType.INT16)
+class Float(DataType):
+    pass
 
 
-class Int8(Number):
-    def __init__(self):
-        super().__init__(NumberType.INT8)
-
-
-class Float(Number):
-    def __init__(self):
-        super().__init__(NumberType.FLOAT)
-
-
-class Double(Number):
-    def __init__(self):
-        super().__init__(NumberType.DOUBLE)
-
-
-class StringType(Enum):
-    FIXED_STRING = 'FIXED_STRING'
-    STRING = 'STRING'
+class Double(DataType):
+    pass
 
 
 class String(DataType):
-    __slots__ = ('string_type', 'max_length')
+    pass
 
-    def __init__(self, string_type: StringType = StringType.STRING, max_length=None):
-        assert string_type == StringType.STRING or max_length
-        self.string_type = string_type
+
+class FixedString(DataType):
+    __slots__ = ('max_length', )
+
+    def __init__(self, max_length):
+        super().__init__()
         self.max_length = max_length
 
     def __str__(self):
-        if self.string_type == StringType.STRING:
-            return self.string_type.value
-        return f'{self.string_type.value}({self.max_length})'
-
-
-class FixedString(String):
-    def __init__(self, max_length):
-        super().__init__(StringType.FIXED_STRING, max_length)
+        return f'{super().__str__()}({self.max_length})'
 
 
 class Bool(DataType):
-    def __str__(self):
-        return 'BOOL'
+    pass
+
+
+def string_to_data_type(db_type_string: str) -> DataType:
+    db_type_string = db_type_string.upper()
+    split_string = db_type_string.split('(', 1)
+    db_type, additional = None, None
+    if len(split_string) == 1:
+        db_type = split_string[0]
+    else:
+        db_type, additional = split_string
+        additional = additional[0:-1]
+    data_type_class = data_type_factory.get(db_type)
+    if not data_type_class:
+        raise RuntimeError('Cannot find the data type!')
+    if additional:
+        return data_type_class(additional)
+    return data_type_class()
