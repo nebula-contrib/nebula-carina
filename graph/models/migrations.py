@@ -16,13 +16,13 @@ def make_migrations():
         for name, cls in module.__dict__.items():
             if inspect.isclass(cls) and (issubclass(cls, TagModel) or issubclass(cls, EdgeTypeModel)):
                 if cls.db_name() in existing_tags:
-                    alter_ngql = cls.alter_ngql()
-                    alter_ngql and ngql_list.append(alter_ngql)
+                    alter_schema_ngql = cls.alter_schema_ngql()
+                    alter_schema_ngql and ngql_list.append(alter_schema_ngql)
                 elif cls.db_name() in existing_edges:
-                    alter_ngql = cls.alter_ngql()
-                    alter_ngql and ngql_list.append(alter_ngql)
+                    alter_schema_ngql = cls.alter_schema_ngql()
+                    alter_schema_ngql and ngql_list.append(alter_schema_ngql)
                 else:
-                    ngql_list.append(cls.create_ngql())
+                    ngql_list.append(cls.create_schema_ngql())
     return ngql_list
 
 

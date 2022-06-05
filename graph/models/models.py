@@ -10,6 +10,9 @@ from graph.utils.utils import pascal_case_to_snake_case
 
 class NebulaModel(BaseModel):
 
+    def save(self, update_fields=None):
+        pass
+
     @classmethod
     def _make_db_fields(cls):
         return [
@@ -32,7 +35,7 @@ class NebulaModel(BaseModel):
         return schema_type
 
     @classmethod
-    def create_ngql(cls):
+    def create_schema_ngql(cls):
         db_fields = cls._make_db_fields()
         meta_cls = getattr(cls, 'Meta', None)
         return create_schema_ngql(
@@ -43,7 +46,7 @@ class NebulaModel(BaseModel):
         )
 
     @classmethod
-    def alter_ngql(cls):
+    def alter_schema_ngql(cls):
         # TODO ttl
         from_dict = {db_field.prop_name: db_field for db_field in describe_schema(cls.get_schema_type(), cls.db_name())}
         to_dict = {db_field.prop_name: db_field for db_field in cls._make_db_fields()}
