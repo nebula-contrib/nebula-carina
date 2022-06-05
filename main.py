@@ -1,10 +1,15 @@
+from collections import OrderedDict
+
 from fastapi import FastAPI
 
-from example.models import Figure
+from example.models import Figure, Source
 from graph.models.migrations import make_migrations, migrate
+from graph.models.models import Vertex
 from graph.ngql.space import *
 from graph.ngql.schema import *
 from graph.ngql.data_types import *
+from graph.ngql.vertex import insert_vertex_ngql
+
 app = FastAPI()
 
 
@@ -23,6 +28,27 @@ async def root():
     # migrations = make_migrations()
     # print(migrations)
     # migrate(migrations)
+    # tags = OrderedDict()
+    # tags['figure'] = ['name', 'age', 'is_virtual']
+    # tags['source'] = ['name']
+    # prop_values_dict = {
+    #     111: ['test1', 33, True, 'test1another'],
+    #     112: ['test2', 15, False, 'test2another']
+    # }
+    #
+    # vertex_ngql = insert_vertex_ngql(
+    #     tags, prop_values_dict
+    # )
+
+    # print(vertex_ngql)
+    # run_ngql(vertex_ngql)
+
+    vertex = Vertex(vid=116, tags=[Figure(name='test3', age=100, is_virtual=False)])
+    vertex.save()
+
+    vertex = Vertex(vid=117, tags=[Figure(name='test4', age=100, is_virtual=False), Source(name='trytest4')])
+    vertex.save()
+    # print(run_ngql('MATCH (v) WHERE id(v) == 114 RETURN v'))
     return f
 
 

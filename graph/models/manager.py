@@ -1,6 +1,6 @@
 
 
-class NebulaManager(object):
+class Manager(object):
     def create(self, **kwargs):
         pass
 
