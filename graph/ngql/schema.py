@@ -3,7 +3,7 @@ from typing import Optional
 
 from graph.ngql.connection import run_ngql
 from graph.ngql.data_types import string_to_data_type
-from graph.ngql.field import NebulaDatabaseField
+from graph.ngql.field import NebulaSchemaField
 
 
 class SubTaskDefinition(object):
@@ -41,7 +41,7 @@ class AlterDefinition(SubTaskDefinition):
 
     def __init__(
             self, alter_definition_type: AlterDefinitionType, *,
-            properties: Optional[list[NebulaDatabaseField]] = None, prop_names: list[str] = None
+            properties: Optional[list[NebulaSchemaField]] = None, prop_names: list[str] = None
     ):
         self.alter_definition_type = alter_definition_type
         if self.alter_definition_type == AlterDefinitionType.DROP:
@@ -69,7 +69,7 @@ def show_edges() -> list[str]:
     return show_schemas(SchemaType.EDGE)
 
 
-def describe_schema(schema: SchemaType, schema_name: str) -> list[NebulaDatabaseField]:
+def describe_schema(schema: SchemaType, schema_name: str) -> list[NebulaSchemaField]:
     tag_info = run_ngql(f'DESCRIBE {schema.value} {schema_name};')
     keys = tag_info.keys()
     fields = []
@@ -78,24 +78,24 @@ def describe_schema(schema: SchemaType, schema_name: str) -> list[NebulaDatabase
             keys[i]: str(v.value, encoding='utf-8') if isinstance(v.value, bytes) else v.value
             for i, v in enumerate(row.values)
         }
-        fields.append(NebulaDatabaseField(
+        fields.append(NebulaSchemaField(
             dic['Field'], string_to_data_type(dic['Type']), nullable=dic['Null'] == 'YES',
             default=dic['Default'], comment=dic['Comment']
         ))
     return fields
 
 
-def describe_tag(tag_name: str) -> list[NebulaDatabaseField]:
+def describe_tag(tag_name: str) -> list[NebulaSchemaField]:
     return describe_schema(SchemaType.TAG, tag_name)
 
 
-def describe_edge(edge_name: str) -> list[NebulaDatabaseField]:
+def describe_edge(edge_name: str) -> list[NebulaSchemaField]:
     return describe_schema(SchemaType.EDGE, edge_name)
 
 
 def create_schema_ngql(
         schema: SchemaType,
-        schema_name: str, properties: list[NebulaDatabaseField], *, if_not_exists: bool = True,
+        schema_name: str, properties: list[NebulaSchemaField], *, if_not_exists: bool = True,
         ttl_definition: Optional[TtlDefinition] = None
 ) -> str:
     return f'CREATE {schema.value}{" IF NOT EXISTS" if if_not_exists else ""} ' \
@@ -103,7 +103,7 @@ def create_schema_ngql(
 
 
 def create_tag_ngql(
-        tag_name: str, properties: list[NebulaDatabaseField], *, if_not_exists: bool = True,
+        tag_name: str, properties: list[NebulaSchemaField], *, if_not_exists: bool = True,
         ttl_definition: Optional[TtlDefinition] = None
 ) -> str:
     return create_schema_ngql(
@@ -112,7 +112,7 @@ def create_tag_ngql(
 
 
 def create_edge_ngql(
-        edge_name: str, properties: list[NebulaDatabaseField], *, if_not_exists: bool = True,
+        edge_name: str, properties: list[NebulaSchemaField], *, if_not_exists: bool = True,
         ttl_definition: Optional[TtlDefinition] = None
 ) -> str:
     return create_schema_ngql(

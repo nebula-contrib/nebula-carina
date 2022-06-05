@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Union
 
 from pydantic import BaseModel
 
@@ -8,10 +9,7 @@ from graph.ngql.schema import TtlDefinition, AlterDefinition, \
 from graph.utils.utils import pascal_case_to_snake_case
 
 
-class NebulaModel(BaseModel):
-
-    def save(self, update_fields=None):
-        pass
+class NebulaSchemaModel(BaseModel):
 
     @classmethod
     def _make_db_fields(cls):
@@ -71,9 +69,24 @@ class NebulaModel(BaseModel):
         return None
 
 
-class TagModel(NebulaModel):
+class TagModel(NebulaSchemaModel):
     pass
 
 
-class EdgeTypeModel(NebulaModel):
+class EdgeTypeModel(NebulaSchemaModel):
+    pass
+
+
+class NebulaRecordModel(BaseModel):
+    pass
+
+
+class Vertex(NebulaRecordModel):
+    vid: Union[int, str]
+
+    def save(self, tags: list[TagModel]):
+        pass
+
+
+class Edge(NebulaRecordModel):
     pass

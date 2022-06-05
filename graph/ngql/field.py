@@ -3,7 +3,7 @@ from typing import Any
 from graph.ngql import data_types
 
 
-class NebulaDatabaseField(object):
+class NebulaSchemaField(object):
     __slots__ = ('prop_name', 'data_type', 'nullable', 'default', 'comment')
 
     def __init__(
@@ -17,7 +17,7 @@ class NebulaDatabaseField(object):
         self.comment = comment
 
     def __eq__(self, other):
-        if not isinstance(other, NebulaDatabaseField):
+        if not isinstance(other, NebulaSchemaField):
             return False
         return (
             self.prop_name == other.prop_name and self.data_type == other.data_type
