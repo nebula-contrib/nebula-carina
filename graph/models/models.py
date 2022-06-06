@@ -1,10 +1,10 @@
 import json
 from collections import OrderedDict
-from enum import Enum
+from inspect import isclass
 from typing import Union
 
 from pydantic import BaseModel
-
+from pydantic.fields import ModelField
 from graph.models.fields import NebulaFieldInfo
 from graph.ngql.connection import run_ngql
 from graph.ngql.schema import TtlDefinition, AlterDefinition, \
@@ -91,23 +91,24 @@ class NebulaRecordModel(BaseModel):
     pass
 
 
-class Vertex(NebulaRecordModel):
+class VertexModel(NebulaRecordModel):
     vid: Union[int, str]
-    tags: list[TagModel]
 
     def save(self, *, if_not_exists: bool = False):
-        # TODO: check if exist
-        # else:
+        # TODO judge if exists
         tag_props = OrderedDict()
         data = []
-        for tag in self.tags:
-            tag_props[tag.db_name()] = tag.get_db_field_names()
-            data.extend([getattr(tag, field_name) for field_name in tag_props[tag.db_name()]])
+        for name, field in self.__class__.__fields__.items():
+            if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel) \
+                    and getattr(self, name, None):
+                tag_props[field.type_.db_name()] = field.type_.get_db_field_names()
+                data.extend(
+                    [getattr(getattr(self, name), field_name) for field_name in tag_props[field.type_.db_name()]]
+                )
         ngql = insert_vertex_ngql(tag_props, {json.dumps(self.vid): data}, if_not_exists=if_not_exists)
-        print(ngql)
         run_ngql(ngql)
 
 
-class Edge(NebulaRecordModel):
+class EdgeModel(NebulaRecordModel):
     vid: Union[int, str]
 

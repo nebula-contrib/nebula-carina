@@ -2,9 +2,8 @@ from collections import OrderedDict
 
 from fastapi import FastAPI
 
-from example.models import Figure, Source
+from example.models import Figure, Source, VirtualCharacter
 from graph.models.migrations import make_migrations, migrate
-from graph.models.models import Vertex
 from graph.ngql.space import *
 from graph.ngql.schema import *
 from graph.ngql.data_types import *
@@ -22,7 +21,7 @@ async def root():
     # print(result)
     # if result.error_code() < 0:
     #     print(result.error_msg())
-    f = Figure(vid=1000, name='xxx', age=22)
+    # f = Figure(vid=1000, name='xxx', age=22)
     # print(Figure._construct_tag())
     # run_ngql(Figure._construct_tag())
     # migrations = make_migrations()
@@ -43,13 +42,15 @@ async def root():
     # print(vertex_ngql)
     # run_ngql(vertex_ngql)
 
-    vertex = Vertex(vid=116, tags=[Figure(name='test3', age=100, is_virtual=False)])
+    vertex = VirtualCharacter(vid=118, figure=Figure(name='test3', age=100, is_virtual=False))
     vertex.save()
 
-    vertex = Vertex(vid=117, tags=[Figure(name='test4', age=100, is_virtual=False), Source(name='trytest4')])
+    vertex = VirtualCharacter(
+        vid=119, figure=Figure(name='test4', age=100, is_virtual=False), source=Source(name='trytest4')
+    )
     vertex.save()
     # print(run_ngql('MATCH (v) WHERE id(v) == 114 RETURN v'))
-    return f
+    return vertex
 
 
 @app.get("/hello/{name}")
