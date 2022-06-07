@@ -1,3 +1,4 @@
+from graph.models.models import NebulaRecordModel
 # MATCH (v) RETURN v LIMIT 3;
 # MATCH (v:player) RETURN v LIMIT 3;
 # MATCH (v:player:actor) RETURN v LIMIT 10;
@@ -12,9 +13,11 @@
 # MATCH (v:player{name:"Tim Duncan"})-[e:follow{degree:95}]->(v2) RETURN e;
 # MATCH (v:player{name:"Tim Duncan"})-[e:follow|:serve]->(v2) RETURN e;
 # MATCH (v:player{name:"Tim Duncan"})-[]->(v2)<-[e:serve]-(v3) RETURN v2, v3;
+from graph.ngql.connection import run_ngql
 
 
 class Manager(object):
-    def match(self, match_gql):
-        pass
+    def match(self, match_ngql: str, cast_to: NebulaRecordModel):
+        result = run_ngql(match_ngql)
+
 
