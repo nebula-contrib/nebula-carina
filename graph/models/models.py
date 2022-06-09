@@ -3,6 +3,7 @@ from collections import OrderedDict
 from inspect import isclass
 from typing import Union
 
+from nebula3.common.ttypes import Vertex, Tag, Edge
 from pydantic import BaseModel
 from pydantic.fields import ModelField
 from graph.models.fields import NebulaFieldInfo
@@ -10,7 +11,7 @@ from graph.ngql.connection import run_ngql
 from graph.ngql.schema import TtlDefinition, AlterDefinition, \
     AlterDefinitionType, create_schema_ngql, SchemaType, describe_schema, alter_schema_ngql
 from graph.ngql.vertex import insert_vertex_ngql
-from graph.utils.utils import pascal_case_to_snake_case
+from graph.utils.utils import pascal_case_to_snake_case, read_str
 
 
 class NebulaSchemaModel(BaseModel):
@@ -80,7 +81,9 @@ class NebulaSchemaModel(BaseModel):
 
 
 class TagModel(NebulaSchemaModel):
-    pass
+    @classmethod
+    def from_tag(cls, tag: Tag):
+        return cls(**{read_str(prop): read_str(value.value) for prop, value in tag.props.items()})
 
 
 class EdgeTypeModel(NebulaSchemaModel):
@@ -88,11 +91,37 @@ class EdgeTypeModel(NebulaSchemaModel):
 
 
 class NebulaRecordModel(BaseModel):
-    pass
+    @classmethod
+    def from_raw(cls, raw_db_item: Vertex | Edge):
+        raise NotImplementedError
 
 
 class VertexModel(NebulaRecordModel):
+
     vid: Union[int, str]
+
+    @classmethod
+    def get_tag_name2model(cls) -> dict[str, TagModel]:
+        return {
+            name: field.type_ for name, field in cls.__fields__.items()
+            if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel)
+        }
+
+    @classmethod
+    def from_raw(cls, raw_db_item: Vertex | Edge):
+        return cls.from_vertex(raw_db_item)
+
+    @classmethod
+    def from_vertex(cls, vertex: Vertex):
+        vid = read_str(vertex.vid.value)
+        tag_dict = cls.get_tag_name2model()
+        return cls(
+            vid=vid,
+            **{
+                read_str(tag.name): tag_dict[read_str(tag.name)].from_tag(tag)
+                for tag in vertex.tags if read_str(tag.name) in tag_dict
+            }
+        )
 
     def save(self, *, if_not_exists: bool = False):
         # TODO judge if exists
@@ -112,3 +141,6 @@ class VertexModel(NebulaRecordModel):
 class EdgeModel(NebulaRecordModel):
     vid: Union[int, str]
 
+    @classmethod
+    def from_raw(cls, raw_db_item: Vertex | Edge):
+        raise NotImplementedError

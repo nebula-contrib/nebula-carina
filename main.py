@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from example.models import Figure, Source, VirtualCharacter
 from graph.models.migrations import make_migrations, migrate
+from graph.models.model_builder import ModelBuilder
 from graph.ngql.query import match, Limit
 from graph.ngql.query_utils import Q
 from graph.ngql.space import *
@@ -51,10 +52,11 @@ async def root():
     # )
     # vertex.save()
     # print(run_ngql('MATCH (v) WHERE id(v) == 114 RETURN v'))
-    results = match('(v)', 'v', limit=Limit(50))
-    print(results)
-    
-    return {}
+    # results = match('(v)', 'v', limit=Limit(50))
+    # print(results)
+    result = ModelBuilder.match('(v)', {'v': VirtualCharacter}, limit=Limit(50))
+
+    return result
 
 
 @app.get("/hello/{name}")

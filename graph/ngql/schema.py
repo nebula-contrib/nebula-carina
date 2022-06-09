@@ -4,6 +4,7 @@ from typing import Optional
 from graph.ngql.connection import run_ngql
 from graph.ngql.data_types import string_to_data_type
 from graph.ngql.field import NebulaSchemaField
+from graph.utils.utils import read_str
 
 
 class SubTaskDefinition(object):
@@ -75,7 +76,7 @@ def describe_schema(schema: SchemaType, schema_name: str) -> list[NebulaSchemaFi
     fields = []
     for row in tag_info.rows():
         dic = {
-            keys[i]: str(v.value, encoding='utf-8') if isinstance(v.value, bytes) else v.value
+            keys[i]: read_str(v.value)
             for i, v in enumerate(row.values)
         }
         fields.append(NebulaSchemaField(

@@ -11,3 +11,7 @@ def snake_case_to_pascal_case(snake_case: str):
     """蛇形转大驼峰（帕斯卡）"""
     words = snake_case.split('_')
     return ''.join(word.title() for word in words)
+
+
+def read_str(characters: any) -> any:
+    return str(characters, encoding='utf-8') if isinstance(characters, bytes) else characters
