@@ -6,12 +6,15 @@ from typing import Union
 from nebula3.common.ttypes import Vertex, Tag, Edge
 from pydantic import BaseModel
 from pydantic.fields import ModelField
+from pydantic.main import ModelMetaclass
+
 from graph.models.fields import NebulaFieldInfo
+from graph.models.managers import Manager, BaseManager
 from graph.ngql.connection import run_ngql
 from graph.ngql.schema import TtlDefinition, AlterDefinition, \
     AlterDefinitionType, create_schema_ngql, SchemaType, describe_schema, alter_schema_ngql
 from graph.ngql.vertex import insert_vertex_ngql
-from graph.utils.utils import pascal_case_to_snake_case, read_str
+from graph.utils.utils import pascal_case_to_snake_case, read_str, classproperty
 
 
 class NebulaSchemaModel(BaseModel):
@@ -90,10 +93,38 @@ class EdgeTypeModel(NebulaSchemaModel):
     pass
 
 
-class NebulaRecordModel(BaseModel):
+class NebulaRecordModelMetaClass(ModelMetaclass):
+
+    def __new__(mcs, name, bases, namespace, **kwargs):
+        cls = super().__new__(
+            mcs, name, bases, {
+                name: field for name, field in namespace.items() if not isinstance(field, Manager)
+            }, **kwargs
+        )
+        setattr(cls, '_managers', {})
+        for base in cls.__bases__:
+            if name != 'NebulaRecordModel' and issubclass(base, NebulaRecordModel):
+                cls._managers.update(base._managers)
+        for name, field in namespace.items():
+            if isinstance(field, Manager):
+                cls._managers[name] = field
+                setattr(cls, name, classproperty(lambda x: field))
+        return cls
+
+    def __init__(cls, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if hasattr(cls, '_managers'):
+            for key, val in cls._managers.items():
+                if isinstance(val, Manager):
+                    val.register(cls)
+
+
+class NebulaRecordModel(BaseModel, metaclass=NebulaRecordModelMetaClass):
     @classmethod
     def from_raw(cls, raw_db_item: Vertex | Edge):
         raise NotImplementedError
+
+    objects = BaseManager()
 
 
 class VertexModel(NebulaRecordModel):

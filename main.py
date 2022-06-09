@@ -54,9 +54,8 @@ async def root():
     # print(run_ngql('MATCH (v) WHERE id(v) == 114 RETURN v'))
     # results = match('(v)', 'v', limit=Limit(50))
     # print(results)
-    result = ModelBuilder.match('(v)', {'v': VirtualCharacter}, limit=Limit(50))
-
-    return result
+    # result = ModelBuilder.match('(v)', {'v': VirtualCharacter}, limit=Limit(50))
+    return VirtualCharacter.objects.any()
 
 
 @app.get("/hello/{name}")
