@@ -8,12 +8,13 @@ from pydantic import BaseModel
 from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
 
+from graph.models.errors import RecordDoesNotExistError
 from graph.models.fields import NebulaFieldInfo
 from graph.models.managers import Manager, BaseManager
 from graph.ngql.connection import run_ngql
 from graph.ngql.schema import TtlDefinition, AlterDefinition, \
     AlterDefinitionType, create_schema_ngql, SchemaType, describe_schema, alter_schema_ngql
-from graph.ngql.vertex import insert_vertex_ngql
+from graph.ngql.vertex import insert_vertex_ngql, update_vertex_ngql, upsert_vertex_ngql
 from graph.utils.utils import pascal_case_to_snake_case, read_str, classproperty
 
 
@@ -31,6 +32,12 @@ class NebulaSchemaModel(BaseModel):
         return [
             field_name for field_name, field in cls.__fields__.items() if isinstance(field.field_info, NebulaFieldInfo)
         ]
+
+    def get_db_field_dict(self) -> dict[str, any]:
+        return {
+            field_name: getattr(self, field_name)
+            for field_name in self.get_db_field_names()
+        }
 
     @classmethod
     def db_name(cls):
@@ -103,7 +110,7 @@ class NebulaRecordModelMetaClass(ModelMetaclass):
         )
         setattr(cls, '_managers', {})
         for base in cls.__bases__:
-            if name != 'NebulaRecordModel' and issubclass(base, NebulaRecordModel):
+            if 'NebulaRecordModel' in globals() and issubclass(base, NebulaRecordModel):
                 cls._managers.update(base._managers)
         for name, field in namespace.items():
             if isinstance(field, Manager):
@@ -154,19 +161,32 @@ class VertexModel(NebulaRecordModel):
             }
         )
 
-    def save(self, *, if_not_exists: bool = False):
-        # TODO judge if exists
-        tag_props = OrderedDict()
-        data = []
+    def _get_tag_models(self):
         for name, field in self.__class__.__fields__.items():
             if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel) \
                     and getattr(self, name, None):
-                tag_props[field.type_.db_name()] = field.type_.get_db_field_names()
+                yield name, field.type_
+
+    def upsert(self):
+        for name, tag_model in self._get_tag_models():
+            run_ngql(upsert_vertex_ngql(tag_model.db_name(), self.vid, getattr(self, name).get_db_field_dict()))
+
+    def save(self, *, if_not_exists: bool = False):
+        #   并发不安全，如果需要并发安全，需要考虑upsert
+        try:
+            self.objects.get(self.vid)
+            for name, tag_model in self._get_tag_models():
+                run_ngql(update_vertex_ngql(tag_model.db_name(), self.vid, getattr(self, name).get_db_field_dict()))
+        except RecordDoesNotExistError:
+            tag_props = OrderedDict()
+            data = []
+            for name, tag_model in self._get_tag_models():
+                tag_props[tag_model.db_name()] = tag_model.get_db_field_names()
                 data.extend(
-                    [getattr(getattr(self, name), field_name) for field_name in tag_props[field.type_.db_name()]]
+                    [getattr(getattr(self, name), field_name) for field_name in tag_props[tag_model.db_name()]]
                 )
-        ngql = insert_vertex_ngql(tag_props, {json.dumps(self.vid): data}, if_not_exists=if_not_exists)
-        run_ngql(ngql)
+            ngql = insert_vertex_ngql(tag_props, {json.dumps(self.vid): data}, if_not_exists=if_not_exists)
+            run_ngql(ngql)
 
 
 class EdgeModel(NebulaRecordModel):

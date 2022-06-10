@@ -1,4 +1,7 @@
+import json
 from abc import ABC
+
+from graph.models.errors import RecordDoesNotExistError
 from graph.ngql.query import Limit, OrderBy
 
 
@@ -16,3 +19,13 @@ class BaseManager(Manager):
         return [
             item['v'] for item in ModelBuilder.match('(v)', {'v': self.model}, order_by=order_by, limit=limit)
         ]
+
+    def get(self, iid: str | int):
+        from graph.models.model_builder import ModelBuilder
+        try:
+            return list(
+                ModelBuilder.match('(v)', {'v': self.model}, condition=f"id(v) == {json.dumps(iid)}", limit=Limit(1))
+            )[0]['v']
+        except IndexError:
+            raise RecordDoesNotExistError(iid)
+

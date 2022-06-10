@@ -10,7 +10,7 @@ from graph.ngql.query_utils import Q
 from graph.ngql.space import *
 from graph.ngql.schema import *
 from graph.ngql.data_types import *
-from graph.ngql.vertex import insert_vertex_ngql
+from graph.ngql.vertex import insert_vertex_ngql, update_vertex_ngql
 
 app = FastAPI()
 
@@ -55,7 +55,13 @@ async def root():
     # results = match('(v)', 'v', limit=Limit(50))
     # print(results)
     # result = ModelBuilder.match('(v)', {'v': VirtualCharacter}, limit=Limit(50))
-    return VirtualCharacter.objects.any()
+    # VirtualCharacter.objects.any()
+    # run_ngql('UPDATE VERTEX ON figure 119 SET name = "卧槽", age=33;')
+    # run_ngql(update_vertex_ngql('figure', 119, {'name':  "卧槽123", 'age': 40}))
+    VirtualCharacter(
+        vid=119, figure=Figure(name='test4', age=100, is_virtual=False), source=Source(name='trytest4')
+    ).save()
+    return VirtualCharacter.objects.get(119)
 
 
 @app.get("/hello/{name}")
