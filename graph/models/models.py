@@ -10,7 +10,7 @@ from pydantic.main import ModelMetaclass
 
 from graph.models.errors import RecordDoesNotExistError
 from graph.models.fields import NebulaFieldInfo
-from graph.models.managers import Manager, BaseManager
+from graph.models.managers import Manager, BaseVertexManager
 from graph.ngql.connection import run_ngql
 from graph.ngql.schema import TtlDefinition, AlterDefinition, \
     AlterDefinitionType, create_schema_ngql, SchemaType, describe_schema, alter_schema_ngql
@@ -131,7 +131,7 @@ class NebulaRecordModel(BaseModel, metaclass=NebulaRecordModelMetaClass):
     def from_raw(cls, raw_db_item: Vertex | Edge):
         raise NotImplementedError
 
-    objects = BaseManager()
+    objects = BaseVertexManager()
 
 
 class VertexModel(NebulaRecordModel):

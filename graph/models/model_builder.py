@@ -13,17 +13,16 @@ from typing import Type, Iterable
 # MATCH (v:player{name:"Tim Duncan"})-[e:follow{degree:95}]->(v2) RETURN e;
 # MATCH (v:player{name:"Tim Duncan"})-[e:follow|:serve]->(v2) RETURN e;
 # MATCH (v:player{name:"Tim Duncan"})-[]->(v2)<-[e:serve]-(v3) RETURN v2, v3;
-from graph.models.models import NebulaRecordModel
 from graph.ngql.query import match, OrderBy, Limit
 
 
 class ModelBuilder(object):
     @staticmethod
     def match(
-            pattern: str, to_model_dict: dict[str, Type[NebulaRecordModel]],
+            pattern: str, to_model_dict: dict[str, any],  # should be model
             *,
             condition: str = None, order_by: OrderBy = None, limit: Limit = None
-    ) -> Iterable[dict[str, NebulaRecordModel]]:
+    ) -> Iterable[dict[str, any]]:  # should be model
         results = match(pattern, ', '.join(to_model_dict.keys()), condition, order_by, limit)
         return (
             {
