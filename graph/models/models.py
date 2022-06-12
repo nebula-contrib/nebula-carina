@@ -13,7 +13,7 @@ from graph.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError
 from graph.models.fields import NebulaFieldInfo
 from graph.models.managers import Manager, BaseVertexManager, BaseEdgeManager
 from graph.ngql.connection.connection import run_ngql
-from graph.ngql.record.edge import update_edge_ngql, insert_edge_ngql
+from graph.ngql.record.edge import update_edge_ngql, insert_edge_ngql, upsert_edge_ngql
 from graph.ngql.schema.schema import Ttl, Alter, \
     create_schema_ngql, describe_schema, alter_schema_ngql
 from graph.ngql.statements.edge import EdgeDefinition, EdgeValue
@@ -231,6 +231,13 @@ class EdgeModel(NebulaRecordModel):
             ranking=ranking,
             **{edge_type_name: edge_type.from_props(edge.props)},
         )
+
+    def upsert(self):
+        name, edge_model = self.get_edge_type_and_model()
+        run_ngql(upsert_edge_ngql(
+            edge_model.db_name(), EdgeDefinition(self.src_vid, self.dst_vid, self.ranking),
+            getattr(self, name).get_db_field_dict()
+        ))
 
     def save(self, *, if_not_exists: bool = False):
         #   并发不安全，如果需要并发安全，需要考虑upsert
