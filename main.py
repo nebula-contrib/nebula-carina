@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from example.models import VirtualCharacter
+from example.models import VirtualCharacter, KillRecord, Kill
 from graph.models.migrations import make_migrations, migrate
 from graph.models.model_builder import ModelBuilder
 from graph.ngql.connection.connection import run_ngql
@@ -67,7 +67,11 @@ async def root():
         )
     print(insert_edge)
     run_ngql(insert_edge)
-    return list(ModelBuilder.match('(v:figure{name: "trytest4"})', {'v': VirtualCharacter}, limit=Limit(50)))
+    # list(ModelBuilder.match('(v:figure{name: "trytest4"})', {'v': VirtualCharacter}, limit=Limit(50)))
+    k = KillRecord(src_vid=112, dst_vid=113, ranking=0, kill=Kill(way='gun', times=20))
+    k.save()
+    # list(ModelBuilder.match('() -[e]-> ()', {'e': KillRecord}, limit=Limit(50)))
+    return k
 
 
 @app.get("/hello/{name}")

@@ -32,3 +32,7 @@ class Kill(models.EdgeTypeModel):
 class VirtualCharacter(models.VertexModel):
     figure: Figure
     source: Optional[Source]
+
+
+class KillRecord(models.EdgeModel):
+    kill: Kill
