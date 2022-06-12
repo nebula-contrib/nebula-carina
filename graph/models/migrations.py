@@ -1,6 +1,6 @@
 from graph.models.models import TagModel, EdgeTypeModel
-from graph.ngql.connection import run_ngql
-from graph.ngql.schema import show_tags, show_edges
+from graph.ngql.connection.connection import run_ngql
+from graph.ngql.schema.schema import show_tags, show_edges
 from graph.settings import database_settings
 from importlib import import_module
 import inspect

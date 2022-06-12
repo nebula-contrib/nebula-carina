@@ -2,10 +2,10 @@ import json
 from abc import ABC
 
 from graph.models.errors import RecordDoesNotExistError
-from graph.ngql.connection import run_ngql
-from graph.ngql.query import Limit, OrderBy
+from graph.ngql.connection.connection import run_ngql
+from graph.ngql.query.match import Limit, OrderBy
 from graph.models.model_builder import ModelBuilder
-from graph.ngql.vertex import delete_vertex_ngql
+from graph.ngql.record.vertex import delete_vertex_ngql
 
 
 class Manager(ABC):

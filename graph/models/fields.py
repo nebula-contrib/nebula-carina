@@ -1,10 +1,10 @@
-from functools import partial
 from typing import Union, Any, Optional, TYPE_CHECKING, Type
 
 from pydantic.fields import Undefined, FieldInfo
 from pydantic.typing import NoArgAnyCallable
-from graph.ngql.data_types import DataType, FixedString
-from graph.ngql.field import NebulaSchemaField
+from graph.ngql.schema.data_types import DataType, FixedString
+from graph.ngql.statements.schema import SchemaField
+
 
 if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, MappingIntStrAny
@@ -20,8 +20,8 @@ class NebulaFieldInfo(FieldInfo):
         else:
             self.data_type = data_type()
 
-    def create_db_field(self, field_name) -> NebulaSchemaField:
-        return NebulaSchemaField(
+    def create_db_field(self, field_name) -> SchemaField:
+        return SchemaField(
             field_name, self.data_type, nullable=self.default is None,
             default=self.default if self.default is not Ellipsis else None, comment=self.description
         )

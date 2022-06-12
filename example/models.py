@@ -2,7 +2,7 @@ from typing import Optional
 
 from graph.models import models
 from graph.models.fields import create_nebula_field as _
-from graph.ngql import data_types
+from graph.ngql.schema import data_types
 
 
 class Figure(models.TagModel):

@@ -1,4 +1,4 @@
-from typing import Type, Iterable
+from typing import Iterable
 # MATCH (v) RETURN v LIMIT 3;
 # MATCH (v:player) RETURN v LIMIT 3;
 # MATCH (v:player:actor) RETURN v LIMIT 10;
@@ -13,7 +13,7 @@ from typing import Type, Iterable
 # MATCH (v:player{name:"Tim Duncan"})-[e:follow{degree:95}]->(v2) RETURN e;
 # MATCH (v:player{name:"Tim Duncan"})-[e:follow|:serve]->(v2) RETURN e;
 # MATCH (v:player{name:"Tim Duncan"})-[]->(v2)<-[e:serve]-(v3) RETURN v2, v3;
-from graph.ngql.query import match, OrderBy, Limit
+from graph.ngql.query.match import match, OrderBy, Limit
 
 
 class ModelBuilder(object):

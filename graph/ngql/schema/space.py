@@ -1,4 +1,4 @@
-from graph.ngql.connection import run_ngql
+from graph.ngql.connection.connection import run_ngql
 from enum import Enum
 
 from graph.settings import database_settings

@@ -11,17 +11,18 @@ from pydantic.main import ModelMetaclass
 from graph.models.errors import RecordDoesNotExistError
 from graph.models.fields import NebulaFieldInfo
 from graph.models.managers import Manager, BaseVertexManager
-from graph.ngql.connection import run_ngql
-from graph.ngql.schema import TtlDefinition, AlterDefinition, \
-    AlterDefinitionType, create_schema_ngql, SchemaType, describe_schema, alter_schema_ngql
-from graph.ngql.vertex import insert_vertex_ngql, update_vertex_ngql, upsert_vertex_ngql
+from graph.ngql.connection.connection import run_ngql
+from graph.ngql.schema.schema import Ttl, Alter, \
+    create_schema_ngql, describe_schema, alter_schema_ngql
+from graph.ngql.statements.schema import AlterType, SchemaType
+from graph.ngql.record.vertex import insert_vertex_ngql, update_vertex_ngql, upsert_vertex_ngql
 from graph.utils.utils import pascal_case_to_snake_case, read_str, classproperty
 
 
 class NebulaSchemaModel(BaseModel):
 
     @classmethod
-    def _make_db_fields(cls):
+    def _create_db_fields(cls):
         return [
             field.field_info.create_db_field(field_name) for field_name, field in cls.__fields__.items()
             if isinstance(field.field_info, NebulaFieldInfo)
@@ -55,12 +56,12 @@ class NebulaSchemaModel(BaseModel):
 
     @classmethod
     def create_schema_ngql(cls):
-        db_fields = cls._make_db_fields()
+        db_fields = cls._create_db_fields()
         meta_cls = getattr(cls, 'Meta', None)
         return create_schema_ngql(
             cls.get_schema_type(),
             cls.db_name(), db_fields,
-            ttl_definition=TtlDefinition(meta_cls.ttl_duration, meta_cls.ttl_col)
+            ttl_definition=Ttl(meta_cls.ttl_duration, meta_cls.ttl_col)
             if meta_cls and getattr(meta_cls, 'ttl_duration', None) else None
         )
 
@@ -68,7 +69,7 @@ class NebulaSchemaModel(BaseModel):
     def alter_schema_ngql(cls):
         # TODO ttl
         from_dict = {db_field.prop_name: db_field for db_field in describe_schema(cls.get_schema_type(), cls.db_name())}
-        to_dict = {db_field.prop_name: db_field for db_field in cls._make_db_fields()}
+        to_dict = {db_field.prop_name: db_field for db_field in cls._create_db_fields()}
         adds, drop_names, changes = [], [], []
         for name, db_field in to_dict.items():
             if name not in from_dict:
@@ -81,11 +82,11 @@ class NebulaSchemaModel(BaseModel):
         if adds or drop_names or changes:
             alter_definitions = []
             if adds:
-                alter_definitions.append(AlterDefinition(AlterDefinitionType.ADD, properties=adds))
+                alter_definitions.append(Alter(AlterType.ADD, properties=adds))
             if changes:
-                alter_definitions.append(AlterDefinition(AlterDefinitionType.CHANGE, properties=changes))
+                alter_definitions.append(Alter(AlterType.CHANGE, properties=changes))
             if drop_names:
-                alter_definitions.append(AlterDefinition(AlterDefinitionType.DROP, prop_names=drop_names))
+                alter_definitions.append(Alter(AlterType.DROP, prop_names=drop_names))
             return alter_schema_ngql(cls.get_schema_type(), cls.db_name(), alter_definitions=alter_definitions)
         return None
 

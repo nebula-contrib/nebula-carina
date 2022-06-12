@@ -1,16 +1,8 @@
-from collections import OrderedDict
-
 from fastapi import FastAPI
 
-from example.models import Figure, Source, VirtualCharacter
-from graph.models.migrations import make_migrations, migrate
+from example.models import VirtualCharacter
 from graph.models.model_builder import ModelBuilder
-from graph.ngql.query import match, Limit
-from graph.ngql.query_utils import Q
-from graph.ngql.space import *
-from graph.ngql.schema import *
-from graph.ngql.data_types import *
-from graph.ngql.vertex import insert_vertex_ngql, update_vertex_ngql
+from graph.ngql.query.match import Limit
 
 app = FastAPI()
 
