@@ -24,6 +24,11 @@ class Belong(models.EdgeTypeModel):
     pass
 
 
+class Kill(models.EdgeTypeModel):
+    way: str = _(data_types.FixedString(10), ..., )
+    times: int = _(data_types.Int8, ..., )
+
+
 class VirtualCharacter(models.VertexModel):
     figure: Figure
     source: Optional[Source]

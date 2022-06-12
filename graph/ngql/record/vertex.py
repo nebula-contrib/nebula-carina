@@ -1,11 +1,10 @@
 import json
 from collections import OrderedDict
-from typing import Any, Union
 
 
 def insert_vertex_ngql(
         tag_props: OrderedDict[str, list[str]],
-        prop_values_dict: dict[Union[int, str], list[Any]],
+        prop_values_dict: dict[int | str, list[any]],
         *, if_not_exists: bool = True,
 ) -> str:
     """
@@ -36,7 +35,7 @@ def insert_vertex_ngql(
 
 
 def update_vertex_ngql(
-    tag_name: str, vid: str | int, prop_name2values: dict[str, Any], condition: str = None, output: str = None
+    tag_name: str, vid: str | int, prop_name2values: dict[str, any], condition: str = None, output: str = None
 ):
     set_str = ', '.join(f'{name} = {json.dumps(val)}' for name, val in prop_name2values.items())
     return f'UPDATE VERTEX ON {tag_name} {json.dumps(vid)} SET {set_str}' \
@@ -44,7 +43,7 @@ def update_vertex_ngql(
 
 
 def upsert_vertex_ngql(
-    tag_name: str, vid: str | int, prop_name2values: dict[str, Any], condition: str = None, output: str = None
+    tag_name: str, vid: str | int, prop_name2values: dict[str, any], condition: str = None, output: str = None
 ):
     set_str = ', '.join(f'{name} = {json.dumps(val)}' for name, val in prop_name2values.items())
     return f'UPSERT VERTEX ON {tag_name} {json.dumps(vid)} SET {set_str}' \

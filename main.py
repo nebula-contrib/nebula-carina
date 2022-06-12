@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 
 from example.models import VirtualCharacter
+from graph.models.migrations import make_migrations, migrate
 from graph.models.model_builder import ModelBuilder
+from graph.ngql.connection.connection import run_ngql
 from graph.ngql.query.match import Limit
+from graph.ngql.record.edge import insert_edge_ngql
+from graph.ngql.statements.edge import EdgeValue
 
 app = FastAPI()
 
@@ -54,6 +58,15 @@ async def root():
     # ).save()
     # VirtualCharacter.objects.get(119)
     # # NEED INDEX TO FIGURE OUT
+    insert_edge = insert_edge_ngql(
+            'kill', ['way', 'times'],
+            [
+                EdgeValue(113, 119, ['knife', 3]),
+                EdgeValue(115, 119, ['gun', 100])
+            ]
+        )
+    print(insert_edge)
+    run_ngql(insert_edge)
     return list(ModelBuilder.match('(v:figure{name: "trytest4"})', {'v': VirtualCharacter}, limit=Limit(50)))
 
 

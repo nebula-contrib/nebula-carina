@@ -27,3 +27,8 @@ def run_ngql(ngql: str, session: Session = None) -> ResultSet:
     if result.error_code() < 0:
         raise NGqlError(result.error_msg(), result.error_code())
     return result
+
+
+if database_settings.default_space:
+    from graph.ngql.schema.space import use_space
+    use_space(database_settings.default_space)
