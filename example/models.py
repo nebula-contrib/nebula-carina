@@ -29,7 +29,7 @@ class Kill(models.EdgeTypeModel):
     times: int = _(data_types.Int8, ..., )
 
 
-class VirtualCharacter(models.VertexModel):
+class VirtualCharacterVertex(models.VertexModel):
     figure: Figure
     source: Optional[Source]
 

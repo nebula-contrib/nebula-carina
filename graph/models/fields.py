@@ -11,6 +11,9 @@ if TYPE_CHECKING:
 
 
 class NebulaFieldInfo(FieldInfo):
+    """
+    field info overwrite pydantic field info
+    """
     __slots__ = ('data_type', )
 
     def __init__(self, data_type: Union[DataType, Type[DataType]], default: Any = Undefined, **kwargs: Any) -> None:

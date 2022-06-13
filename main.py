@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from example.models import VirtualCharacter, KillEdge, Kill
+from example.models import VirtualCharacterVertex, KillEdge, Kill
 from graph.models.migrations import make_migrations, migrate
 from graph.models.model_builder import ModelBuilder
 from graph.ngql.connection.connection import run_ngql
@@ -40,23 +40,23 @@ async def root():
     # print(vertex_ngql)
     # run_ngql(vertex_ngql)
 
-    # vertex = VirtualCharacter(vid=118, figure=Figure(name='test3', age=100, is_virtual=False))
+    # vertex = VirtualCharacterVertex(vid=118, figure=Figure(name='test3', age=100, is_virtual=False))
     # vertex.save()
     #
-    # vertex = VirtualCharacter(
+    # vertex = VirtualCharacterVertex(
     #     vid=119, figure=Figure(name='test4', age=100, is_virtual=False), source=Source(name='trytest4')
     # )
     # vertex.save()
     # print(run_ngql('MATCH (v) WHERE id(v) == 114 RETURN v'))
     # results = match('(v)', 'v', limit=Limit(50))
     # print(results)
-    # VirtualCharacter.objects.any()
+    # VirtualCharacterVertex.objects.any()
     # run_ngql('UPDATE VERTEX ON figure 119 SET name = "卧槽", age=33;')
     # run_ngql(update_vertex_ngql('figure', 119, {'name':  "卧槽123", 'age': 40}))
-    # VirtualCharacter(
+    # VirtualCharacterVertex(
     #     vid=119, figure=Figure(name='test4', age=100, is_virtual=False), source=Source(name='trytest4')
     # ).save()
-    # VirtualCharacter.objects.get(119)
+    # VirtualCharacterVertex.objects.get(119)
     # # NEED INDEX TO FIGURE OUT
     insert_edge = insert_edge_ngql(
             'kill', ['way', 'times'],
@@ -65,13 +65,18 @@ async def root():
                 EdgeValue(115, 119, ['gun', 100])
             ]
         )
-    print(insert_edge)
-    run_ngql(insert_edge)
-    # list(ModelBuilder.match('(v:figure{name: "trytest4"})', {'v': VirtualCharacter}, limit=Limit(50)))
-    k = KillEdge(src_vid=112, dst_vid=113, ranking=0, kill=Kill(way='gun', times=20))
-    k.save()
+    # print(insert_edge)
+    # run_ngql(insert_edge)
+    # list(ModelBuilder.match('(v:figure{name: "trytest4"})', {'v': VirtualCharacterVertex}, limit=Limit(50)))
+    # k = KillEdge(src_vid=112, dst_vid=113, ranking=0, kill=Kill(way='gun', times=20))
+    # k.save()
     # list(ModelBuilder.match('() -[e]-> ()', {'e': KillEdge}, limit=Limit(50)))
-    return k
+
+    """
+    design such a system:
+    
+    """
+    return {}
 
 
 @app.get("/hello/{name}")

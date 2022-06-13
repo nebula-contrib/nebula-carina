@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
 
+from graph.models.abstract import NebulaAdaptor
 from graph.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError
 from graph.models.fields import NebulaFieldInfo
 from graph.models.managers import Manager, BaseVertexManager, BaseEdgeManager
@@ -132,11 +133,7 @@ class NebulaRecordModelMetaClass(ModelMetaclass):
                     val.register(cls)
 
 
-class NebulaRecordModel(BaseModel, metaclass=NebulaRecordModelMetaClass):
-    @classmethod
-    def from_raw(cls, raw_db_item: Vertex | Edge):
-        raise NotImplementedError
-
+class NebulaRecordModel(BaseModel, NebulaAdaptor, metaclass=NebulaRecordModelMetaClass):
     objects = BaseVertexManager()
 
 
@@ -153,7 +150,7 @@ class VertexModel(NebulaRecordModel):
         }
 
     @classmethod
-    def from_raw(cls, raw_db_item: Vertex | Edge):
+    def from_nebula_db_cls(cls, raw_db_item: Vertex | Edge):
         return cls.from_vertex(raw_db_item)
 
     @classmethod
@@ -204,7 +201,7 @@ class EdgeModel(NebulaRecordModel):
     # it should have AN edge type model
 
     @classmethod
-    def from_raw(cls, raw_db_item: Vertex | Edge):
+    def from_nebula_db_cls(cls, raw_db_item: Vertex | Edge):
         return cls.from_edge(raw_db_item)
 
     @classmethod
