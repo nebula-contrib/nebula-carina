@@ -34,5 +34,5 @@ class VirtualCharacter(models.VertexModel):
     source: Optional[Source]
 
 
-class KillRecord(models.EdgeModel):
+class KillEdge(models.EdgeModel):
     kill: Kill
