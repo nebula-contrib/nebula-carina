@@ -22,7 +22,7 @@ def update_edge_ngql(
         edge_type_name: str, edge_definition: EdgeDefinition,
         prop_name2values: dict[str, any], condition: str = None, output: str = None
 ):
-    set_str = ', '.join(f'{name} = {json.dumps(val)}' for name, val in prop_name2values.items())
+    set_str = ', '.join(f'{name} = {val}' for name, val in prop_name2values.items())
     return f'UPDATE EDGE ON {edge_type_name} {edge_definition} SET {set_str}' \
            f'{f" WHEN {condition}" if condition else ""}{f"YIELD {output}" if output else ""};'
 
@@ -31,6 +31,6 @@ def upsert_edge_ngql(
         edge_type_name: str, edge_definition: EdgeDefinition,
         prop_name2values: dict[str, any], condition: str = None, output: str = None
 ):
-    set_str = ', '.join(f'{name} = {json.dumps(val)}' for name, val in prop_name2values.items())
+    set_str = ', '.join(f'{name} = {val}' for name, val in prop_name2values.items())
     return f'UPSERT EDGE ON {edge_type_name} {edge_definition} SET {set_str}' \
            f'{f" WHEN {condition}" if condition else ""}{f"YIELD {output}" if output else ""};'

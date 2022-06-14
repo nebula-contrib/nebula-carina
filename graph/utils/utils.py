@@ -40,8 +40,15 @@ class ClassPropertyDescriptor(object):
         self.fset = func
         return self
 
+
 def classproperty(func):
     if not isinstance(func, (classmethod, staticmethod)):
         func = classmethod(func)
 
     return ClassPropertyDescriptor(func)
+
+
+def vid2str(vid: str | int):
+    if isinstance(vid, str):
+        return f'"{vid}"'
+    return str(vid)

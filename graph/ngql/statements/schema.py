@@ -19,7 +19,7 @@ class SchemaField(Statement):
 
     def __str__(self):
         return f'{self.prop_name} {self.data_type} {"NULL" if self.nullable else "NOT NULL"}' \
-               f'{f" DEFAULT {self.default}" if self.default is not None else ""}' \
+               f'{f" DEFAULT {self.data_type.value2db_str(self.default)}" if self.default is not None else ""}' \
                f'{f" COMMENT {self.comment}" if self.comment else ""}'
 
 

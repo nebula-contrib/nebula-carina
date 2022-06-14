@@ -27,9 +27,10 @@ def describe_schema(schema: SchemaType, schema_name: str) -> list[SchemaField]:
             keys[i]: read_str(v.value)
             for i, v in enumerate(row.values)
         }
+        data_type = string_to_data_type(dic['Type'])
         fields.append(SchemaField(
-            dic['Field'], string_to_data_type(dic['Type']), nullable=dic['Null'] == 'YES',
-            default=dic['Default'], comment=dic['Comment']
+            dic['Field'], data_type, nullable=dic['Null'] == 'YES',
+            default=data_type.ttype2python_type(dic['Default']), comment=dic['Comment']
         ))
     return fields
 
@@ -114,7 +115,3 @@ def alter_edge_ngql(
     return alter_schema_ngql(
         SchemaType.TAG, edge_name, alter_definitions=alter_definitions, ttl_definition=ttl_definition
     )
-
-
-def delete_tag(tag_names: list[str], vid: str | int):
-    run_ngql(f'DELETE TAG {",".join(tag_names)} FROM {vid};')

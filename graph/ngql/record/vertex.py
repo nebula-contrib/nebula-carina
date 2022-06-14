@@ -1,6 +1,8 @@
 import json
 from collections import OrderedDict
 
+from graph.utils.utils import vid2str
+
 
 def insert_vertex_ngql(
         tag_props: OrderedDict[str, list[str]],
@@ -26,7 +28,7 @@ def insert_vertex_ngql(
         f'{tag_prop_name} ({", ".join(field_names)})' for tag_prop_name, field_names in tag_props.items()
     )
     prop_def = ', '.join(
-        f'{vid}: ({", ".join(json.dumps(prop_val) for prop_val in prop_values)})'
+        f'{vid2str(vid)}: ({", ".join(prop_val for prop_val in prop_values)})'
         for vid, prop_values in prop_values_dict.items()
     )
 
@@ -37,19 +39,24 @@ def insert_vertex_ngql(
 def update_vertex_ngql(
     tag_name: str, vid: str | int, prop_name2values: dict[str, any], condition: str = None, output: str = None
 ):
-    set_str = ', '.join(f'{name} = {json.dumps(val)}' for name, val in prop_name2values.items())
-    return f'UPDATE VERTEX ON {tag_name} {json.dumps(vid)} SET {set_str}' \
+    set_str = ', '.join(f'{name} = {val}' for name, val in prop_name2values.items())
+    return f'UPDATE VERTEX ON {tag_name} {vid2str(vid)} SET {set_str}' \
            f'{f" WHEN {condition}" if condition else ""}{f"YIELD {output}" if output else ""};'
 
 
 def upsert_vertex_ngql(
     tag_name: str, vid: str | int, prop_name2values: dict[str, any], condition: str = None, output: str = None
 ):
-    set_str = ', '.join(f'{name} = {json.dumps(val)}' for name, val in prop_name2values.items())
-    return f'UPSERT VERTEX ON {tag_name} {json.dumps(vid)} SET {set_str}' \
+    set_str = ', '.join(f'{name} = {val}' for name, val in prop_name2values.items())
+    return f'UPSERT VERTEX ON {tag_name} {vid2str(vid)} SET {set_str}' \
            f'{f" WHEN {condition}" if condition else ""}{f"YIELD {output}" if output else ""};'
 
 
 def delete_vertex_ngql(vid_list: list[int | str], with_edge: bool = True):
     # 不支持原子性删除，如果发生错误请重试，避免出现部分删除的情况。否则会导致悬挂边。
-    return f'DELETE VERTEX {", ".join(json.dumps(i) for i in vid_list)}{" WITH EDGE" if with_edge else ""};'
+    return f'DELETE VERTEX {", ".join(vid2str(vid) for vid in vid_list)}{" WITH EDGE" if with_edge else ""};'
+
+
+def delete_tag_ngql(tag_names: list[str], vid: str | int):
+    return f'DELETE TAG {",".join(tag_names)} FROM {vid2str(vid)};'
+

@@ -2,7 +2,6 @@ import json
 from collections import OrderedDict
 from functools import partial
 from inspect import isclass
-from typing import Union
 
 from nebula3.common.ttypes import Vertex, Tag, Edge
 from pydantic import BaseModel
@@ -15,6 +14,7 @@ from graph.models.fields import NebulaFieldInfo
 from graph.models.managers import Manager, BaseVertexManager, BaseEdgeManager
 from graph.ngql.connection.connection import run_ngql
 from graph.ngql.record.edge import update_edge_ngql, insert_edge_ngql, upsert_edge_ngql
+from graph.ngql.schema.data_types import ttype2python_value
 from graph.ngql.schema.schema import Ttl, Alter, \
     create_schema_ngql, describe_schema, alter_schema_ngql
 from graph.ngql.statements.edge import EdgeDefinition, EdgeValue
@@ -40,9 +40,12 @@ class NebulaSchemaModel(BaseModel):
 
     def get_db_field_dict(self) -> dict[str, any]:
         return {
-            field_name: getattr(self, field_name)
-            for field_name in self.get_db_field_names()
+            field_name: field.field_info.data_type.value2db_str(getattr(self, field_name))
+            for field_name, field in self.__class__.__fields__.items() if isinstance(field.field_info, NebulaFieldInfo)
         }
+
+    def get_db_field_value(self, field_name) -> str:
+        return self.__class__.__fields__[field_name].field_info.data_type.value2db_str(getattr(self, field_name))
 
     @classmethod
     def db_name(cls):
@@ -98,7 +101,7 @@ class NebulaSchemaModel(BaseModel):
 class TagModel(NebulaSchemaModel):
     @classmethod
     def from_tag(cls, tag: Tag):
-        return cls(**{read_str(prop): read_str(value.value) for prop, value in tag.props.items()})
+        return cls(**{read_str(prop): ttype2python_value(value.value) for prop, value in tag.props.items()})
 
 
 class EdgeTypeModel(NebulaSchemaModel):
@@ -139,7 +142,7 @@ class NebulaRecordModel(BaseModel, NebulaAdaptor, metaclass=NebulaRecordModelMet
 
 class VertexModel(NebulaRecordModel):
 
-    vid: Union[int, str]
+    vid: int | str
     objects = BaseVertexManager()
 
     @classmethod
@@ -187,15 +190,18 @@ class VertexModel(NebulaRecordModel):
             for name, tag_model in self._get_tag_models():
                 tag_props[tag_model.db_name()] = tag_model.get_db_field_names()
                 data.extend(
-                    [getattr(getattr(self, name), field_name) for field_name in tag_props[tag_model.db_name()]]
+                    [
+                        getattr(self, name).get_db_field_value(field_name)
+                        for field_name in tag_props[tag_model.db_name()]
+                    ]
                 )
-            ngql = insert_vertex_ngql(tag_props, {json.dumps(self.vid): data}, if_not_exists=if_not_exists)
+            ngql = insert_vertex_ngql(tag_props, {self.vid: data}, if_not_exists=if_not_exists)
             run_ngql(ngql)
 
 
 class EdgeModel(NebulaRecordModel):
-    src_vid: Union[int, str]
-    dst_vid: Union[int, str]
+    src_vid: int | str
+    dst_vid: int | str
     ranking: int = 0
     objects = BaseEdgeManager()
     # it should have AN edge type model

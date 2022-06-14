@@ -1,6 +1,8 @@
+from datetime import datetime
+
 from fastapi import FastAPI
 
-from example.models import VirtualCharacterVertex, KillEdge, Kill
+from example.models import VirtualCharacterVertex, KillEdge, Kill, Figure, Source
 from graph.models.migrations import make_migrations, migrate
 from graph.models.model_builder import ModelBuilder
 from graph.ngql.connection.connection import run_ngql
@@ -53,9 +55,11 @@ async def root():
     # VirtualCharacterVertex.objects.any()
     # run_ngql('UPDATE VERTEX ON figure 119 SET name = "卧槽", age=33;')
     # run_ngql(update_vertex_ngql('figure', 119, {'name':  "卧槽123", 'age': 40}))
-    # VirtualCharacterVertex(
-    #     vid=119, figure=Figure(name='test4', age=100, is_virtual=False), source=Source(name='trytest4')
-    # ).save()
+    VirtualCharacterVertex(
+        vid=201, figure=Figure(
+            name='test4', age=100, is_virtual=False, some_dt=datetime(2021, 3, 3, 0, 0, 0, 12)
+        ), source=Source(name='trytest4')
+    ).save()
     # VirtualCharacterVertex.objects.get(119)
     # # NEED INDEX TO FIGURE OUT
     # insert_edge = insert_edge_ngql(
@@ -71,7 +75,7 @@ async def root():
     # k = KillEdge(src_vid=112, dst_vid=113, ranking=0, kill=Kill(way='gun', times=20))
     # k.save()
     # list(ModelBuilder.match('() -[e]-> ()', {'e': KillEdge}, limit=Limit(50)))
-    print(list(ModelBuilder.match('(v)', {'v': VirtualCharacterVertex}, limit=Limit(10))))
+    # print(list(ModelBuilder.match('(v)', {'v': VirtualCharacterVertex}, limit=Limit(10))))
     return ModelBuilder.match(
         '(v)-[e:kill]->(v2)', {'v': VirtualCharacterVertex, 'e': KillEdge, 'v2': VirtualCharacterVertex},
         condition='id(v) == 112',

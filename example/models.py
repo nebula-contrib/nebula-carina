@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from graph.models import models
@@ -9,7 +10,11 @@ class Figure(models.TagModel):
     name: str = _(data_types.FixedString(30), ..., )
     age: int = _(data_types.Int16, ..., )
     valid_until: int = _(data_types.Int64, None, )
+    hp: int = _(data_types.Int16, 100, )
+    style: str = _(data_types.FixedString(10), 'rap', )
     is_virtual: bool = _(data_types.Bool, True)
+    created_on: datetime = _(data_types.Datetime, data_types.Datetime.auto)
+    some_dt: datetime = _(data_types.Datetime, datetime(2022, 1, 1))
 
     class Meta:
         ttl_duration = 100

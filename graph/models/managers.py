@@ -8,6 +8,7 @@ from graph.models.model_builder import ModelBuilder
 from graph.ngql.record.edge import delete_edge_ngql
 from graph.ngql.record.vertex import delete_vertex_ngql
 from graph.ngql.statements.edge import EdgeDefinition
+from graph.utils.utils import vid2str
 
 
 class Manager(ABC):
@@ -27,7 +28,7 @@ class BaseVertexManager(Manager):
     def get(self, vid: str | int):
         try:
             return list(
-                ModelBuilder.match('(v)', {'v': self.model}, condition=f"id(v) == {json.dumps(vid)}", limit=Limit(1))
+                ModelBuilder.match('(v)', {'v': self.model}, condition=f"id(v) == {vid2str(vid)}", limit=Limit(1))
             )[0]['v']
         except IndexError:
             raise VertexDoesNotExistError(vid)
@@ -43,13 +44,13 @@ class BaseEdgeManager(Manager):
     #     ]
 
     def get(self, edge_definition: EdgeDefinition):
-        # TODO rank definition
+        # TODO rank definition is useless for now
         try:
             return list(
                 ModelBuilder.match(
                     '(v1)-[e]->(v2)', {'e': self.model},
-                    condition=f"id(v1) == {edge_definition.src_vid} "
-                              f"AND id(v2) == {edge_definition.dst_vid}"
+                    condition=f"id(v1) == {vid2str(edge_definition.src_vid)} "
+                              f"AND id(v2) == {vid2str(edge_definition.dst_vid)}"
                     , limit=Limit(1)
                 )
             )[0]['e']
