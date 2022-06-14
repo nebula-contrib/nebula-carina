@@ -58,25 +58,24 @@ async def root():
     # ).save()
     # VirtualCharacterVertex.objects.get(119)
     # # NEED INDEX TO FIGURE OUT
-    insert_edge = insert_edge_ngql(
-            'kill', ['way', 'times'],
-            [
-                EdgeValue(113, 119, ['knife', 3]),
-                EdgeValue(115, 119, ['gun', 100])
-            ]
-        )
+    # insert_edge = insert_edge_ngql(
+    #         'kill', ['way', 'times'],
+    #         [
+    #             EdgeValue(113, 119, ['knife', 3]),
+    #             EdgeValue(115, 119, ['gun', 100])
+    #         ]
+    #     )
     # print(insert_edge)
     # run_ngql(insert_edge)
     # list(ModelBuilder.match('(v:figure{name: "trytest4"})', {'v': VirtualCharacterVertex}, limit=Limit(50)))
     # k = KillEdge(src_vid=112, dst_vid=113, ranking=0, kill=Kill(way='gun', times=20))
     # k.save()
     # list(ModelBuilder.match('() -[e]-> ()', {'e': KillEdge}, limit=Limit(50)))
-
-    """
-    design such a system:
-    
-    """
-    return {}
+    print(list(ModelBuilder.match('(v)', {'v': VirtualCharacterVertex}, limit=Limit(10))))
+    return ModelBuilder.match(
+        '(v)-[e:kill]->(v2)', {'v': VirtualCharacterVertex, 'e': KillEdge, 'v2': VirtualCharacterVertex},
+        condition='id(v) == 112',
+    )
 
 
 @app.get("/hello/{name}")

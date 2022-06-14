@@ -19,10 +19,10 @@ class Manager(ABC):
 
 
 class BaseVertexManager(Manager):
-    def any(self, limit: Limit = Limit(10), order_by: OrderBy = None):
-        return [
-            item['v'] for item in ModelBuilder.match('(v)', {'v': self.model}, order_by=order_by, limit=limit)
-        ]
+    # def any(self, limit: Limit = Limit(10), order_by: OrderBy = None):
+    #     return [
+    #         item['v'] for item in ModelBuilder.match('(v)', {'v': self.model}, order_by=order_by, limit=limit)
+    #     ]
 
     def get(self, vid: str | int):
         try:
@@ -37,10 +37,10 @@ class BaseVertexManager(Manager):
 
 
 class BaseEdgeManager(Manager):
-    def any(self, limit: Limit = Limit(10), order_by: OrderBy = None):
-        return [
-            item['e'] for item in ModelBuilder.match('()-[e]->()', {'e': self.model}, order_by=order_by, limit=limit)
-        ]
+    # def any(self, limit: Limit = Limit(10), order_by: OrderBy = None):
+    #     return [
+    #         item['e'] for item in ModelBuilder.match('()-[e]->()', {'e': self.model}, order_by=order_by, limit=limit)
+    #     ]
 
     def get(self, edge_definition: EdgeDefinition):
         # TODO rank definition

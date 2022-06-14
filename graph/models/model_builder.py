@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Type
 # MATCH (v) RETURN v LIMIT 3;
 # MATCH (v:player) RETURN v LIMIT 3;
 # MATCH (v:player:actor) RETURN v LIMIT 10;
@@ -20,7 +20,7 @@ from graph.ngql.query.match import match, OrderBy, Limit
 class ModelBuilder(object):
     @staticmethod
     def match(
-            pattern: str, to_model_dict: dict[str, NebulaAdaptor],  # should be model
+            pattern: str, to_model_dict: dict[str, Type[NebulaAdaptor]],  # should be model
             *,
             condition: str = None, order_by: OrderBy = None, limit: Limit = None
     ) -> Iterable[dict[str, NebulaAdaptor]]:  # should be model
