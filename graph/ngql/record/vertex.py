@@ -1,4 +1,3 @@
-import json
 from collections import OrderedDict
 
 from graph.utils.utils import vid2str

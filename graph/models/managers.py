@@ -1,9 +1,8 @@
-import json
 from abc import ABC
 
 from graph.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError
 from graph.ngql.connection.connection import run_ngql
-from graph.ngql.query.match import Limit, OrderBy
+from graph.ngql.query.match import Limit
 from graph.models.model_builder import ModelBuilder
 from graph.ngql.record.edge import delete_edge_ngql
 from graph.ngql.record.vertex import delete_vertex_ngql
@@ -44,7 +43,7 @@ class BaseEdgeManager(Manager):
     #     ]
 
     def get(self, edge_definition: EdgeDefinition):
-        # TODO rank definition is useless for now
+        # FIXME: rank definition is useless for now
         try:
             return list(
                 ModelBuilder.match(

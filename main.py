@@ -80,8 +80,3 @@ async def root():
         '(v)-[e:kill]->(v2)', {'v': VirtualCharacterVertex, 'e': KillEdge, 'v2': VirtualCharacterVertex},
         condition='id(v) == 112',
     )
-
-
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}

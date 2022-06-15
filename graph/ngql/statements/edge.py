@@ -1,5 +1,3 @@
-import json
-
 from graph.ngql.statements.core import Statement
 from graph.utils.utils import vid2str
 

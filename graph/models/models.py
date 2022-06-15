@@ -1,4 +1,3 @@
-import json
 from collections import OrderedDict
 from functools import partial
 from inspect import isclass

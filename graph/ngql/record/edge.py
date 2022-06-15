@@ -1,5 +1,3 @@
-import json
-
 from graph.ngql.statements.edge import EdgeValue, EdgeDefinition
 
 
