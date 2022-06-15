@@ -7,19 +7,19 @@ from pydantic import BaseModel
 from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
 
-from graph.models.abstract import NebulaAdaptor
-from graph.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError
-from graph.models.fields import NebulaFieldInfo
-from graph.models.managers import Manager, BaseVertexManager, BaseEdgeManager
-from graph.ngql.connection.connection import run_ngql
-from graph.ngql.record.edge import update_edge_ngql, insert_edge_ngql, upsert_edge_ngql
-from graph.ngql.schema.data_types import ttype2python_value
-from graph.ngql.schema.schema import Ttl, Alter, \
+from nebula_model.models.abstract import NebulaAdaptor
+from nebula_model.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError
+from nebula_model.models.fields import NebulaFieldInfo
+from nebula_model.models.managers import Manager, BaseVertexManager, BaseEdgeManager
+from nebula_model.ngql.connection.connection import run_ngql
+from nebula_model.ngql.record.edge import update_edge_ngql, insert_edge_ngql, upsert_edge_ngql
+from nebula_model.ngql.schema.data_types import ttype2python_value
+from nebula_model.ngql.schema.schema import Ttl, Alter, \
     create_schema_ngql, describe_schema, alter_schema_ngql
-from graph.ngql.statements.edge import EdgeDefinition, EdgeValue
-from graph.ngql.statements.schema import AlterType, SchemaType
-from graph.ngql.record.vertex import insert_vertex_ngql, update_vertex_ngql, upsert_vertex_ngql
-from graph.utils.utils import pascal_case_to_snake_case, read_str, classproperty
+from nebula_model.ngql.statements.edge import EdgeDefinition, EdgeValue
+from nebula_model.ngql.statements.schema import AlterType, SchemaType
+from nebula_model.ngql.record.vertex import insert_vertex_ngql, update_vertex_ngql, upsert_vertex_ngql
+from nebula_model.utils.utils import pascal_case_to_snake_case, read_str, classproperty
 
 
 class NebulaSchemaModel(BaseModel):

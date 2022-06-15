@@ -1,13 +1,13 @@
 from abc import ABC
 
-from graph.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError
-from graph.ngql.connection.connection import run_ngql
-from graph.ngql.query.match import Limit
-from graph.models.model_builder import ModelBuilder
-from graph.ngql.record.edge import delete_edge_ngql
-from graph.ngql.record.vertex import delete_vertex_ngql
-from graph.ngql.statements.edge import EdgeDefinition
-from graph.utils.utils import vid2str
+from nebula_model.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError
+from nebula_model.ngql.connection.connection import run_ngql
+from nebula_model.ngql.query.match import Limit
+from nebula_model.models.model_builder import ModelBuilder
+from nebula_model.ngql.record.edge import delete_edge_ngql
+from nebula_model.ngql.record.vertex import delete_vertex_ngql
+from nebula_model.ngql.statements.edge import EdgeDefinition
+from nebula_model.utils.utils import vid2str
 
 
 class Manager(ABC):

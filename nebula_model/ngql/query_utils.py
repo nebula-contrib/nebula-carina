@@ -1,6 +1,6 @@
 import copy
 
-from graph.utils import tree
+from nebula_model.utils import tree
 
 
 class Q(tree.Node):

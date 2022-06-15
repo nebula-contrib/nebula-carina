@@ -2,8 +2,8 @@ from typing import Union, Any, Optional, TYPE_CHECKING, Type
 
 from pydantic.fields import Undefined, FieldInfo
 from pydantic.typing import NoArgAnyCallable
-from graph.ngql.schema.data_types import DataType, FixedString
-from graph.ngql.statements.schema import SchemaField
+from nebula_model.ngql.schema.data_types import DataType, FixedString
+from nebula_model.ngql.statements.schema import SchemaField
 
 
 if TYPE_CHECKING:

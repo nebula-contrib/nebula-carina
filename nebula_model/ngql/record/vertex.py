@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from graph.utils.utils import vid2str
+from nebula_model.utils.utils import vid2str
 
 
 def insert_vertex_ngql(

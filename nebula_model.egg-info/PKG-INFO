@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: nebula-model
+Version: 0.0.1
+Summary: Nebula Database Modeling powered by Pydantic and Nebula Python.
+Home-page: https://github.com/SwordElucidator/nebula-model
+Author: Sword Elucidator
+Author-email: nagisa940216@gmail.com
+License: MIT Licence
+Platform: UNKNOWN
+Requires-Python: >=3.10
+License-File: LICENSE
+
+UNKNOWN
+

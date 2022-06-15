@@ -1,5 +1,5 @@
-from graph.ngql.connection.connection import run_ngql
-from graph.ngql.statements.clauses import OrderBy, Limit
+from nebula_model.ngql.connection.connection import run_ngql
+from nebula_model.ngql.statements.clauses import OrderBy, Limit
 
 
 def match(

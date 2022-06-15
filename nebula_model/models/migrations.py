@@ -1,7 +1,7 @@
-from graph.models.models import TagModel, EdgeTypeModel
-from graph.ngql.connection.connection import run_ngql
-from graph.ngql.schema.schema import show_tags, show_edges
-from graph.settings import database_settings
+from nebula_model.models.models import TagModel, EdgeTypeModel
+from nebula_model.ngql.connection.connection import run_ngql
+from nebula_model.ngql.schema.schema import show_tags, show_edges
+from nebula_model.settings import database_settings
 from importlib import import_module
 import inspect
 

@@ -1,6 +1,6 @@
 from datetime import datetime, date, time
 
-from graph.utils.utils import pascal_case_to_snake_case, read_str
+from nebula_model.utils.utils import pascal_case_to_snake_case, read_str
 from nebula3.common import ttypes
 
 data_type_factory = {}

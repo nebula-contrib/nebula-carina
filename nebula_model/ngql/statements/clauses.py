@@ -1,4 +1,4 @@
-from graph.ngql.statements.core import Statement
+from nebula_model.ngql.statements.core import Statement
 
 
 class OrderBy(Statement):

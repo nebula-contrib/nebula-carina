@@ -3,12 +3,12 @@ from datetime import datetime
 from fastapi import FastAPI
 
 from example.models import VirtualCharacterVertex, KillEdge, Kill, Figure, Source
-from graph.models.migrations import make_migrations, migrate
-from graph.models.model_builder import ModelBuilder
-from graph.ngql.connection.connection import run_ngql
-from graph.ngql.query.match import Limit
-from graph.ngql.record.edge import insert_edge_ngql
-from graph.ngql.statements.edge import EdgeValue
+from nebula_model.models.migrations import make_migrations, migrate
+from nebula_model.models.model_builder import ModelBuilder
+from nebula_model.ngql.connection.connection import run_ngql
+from nebula_model.ngql.query.match import Limit
+from nebula_model.ngql.record.edge import insert_edge_ngql
+from nebula_model.ngql.statements.edge import EdgeValue
 
 app = FastAPI()
 

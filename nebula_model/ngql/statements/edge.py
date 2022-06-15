@@ -1,5 +1,5 @@
-from graph.ngql.statements.core import Statement
-from graph.utils.utils import vid2str
+from nebula_model.ngql.statements.core import Statement
+from nebula_model.utils.utils import vid2str
 
 
 class EdgeDefinition(Statement):

@@ -1,4 +1,4 @@
-from graph.ngql.statements.edge import EdgeValue, EdgeDefinition
+from nebula_model.ngql.statements.edge import EdgeValue, EdgeDefinition
 
 
 def insert_edge_ngql(

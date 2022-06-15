@@ -4,7 +4,7 @@ import copy
 
 class Node:
     """
-    A single internal node in the tree graph. A Node should be viewed as a
+    A single internal node in the tree nebula_model. A Node should be viewed as a
     connection (the root) with the children being either leaf nodes or other
     Node instances.
     """

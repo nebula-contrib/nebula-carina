@@ -13,8 +13,8 @@ from typing import Iterable, Type
 # MATCH (v:player{name:"Tim Duncan"})-[e:follow{degree:95}]->(v2) RETURN e;
 # MATCH (v:player{name:"Tim Duncan"})-[e:follow|:serve]->(v2) RETURN e;
 # MATCH (v:player{name:"Tim Duncan"})-[]->(v2)<-[e:serve]-(v3) RETURN v2, v3;
-from graph.models.abstract import NebulaAdaptor
-from graph.ngql.query.match import match, OrderBy, Limit
+from nebula_model.models.abstract import NebulaAdaptor
+from nebula_model.ngql.query.match import match, OrderBy, Limit
 
 
 class ModelBuilder(object):

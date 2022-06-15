@@ -1,4 +1,4 @@
-from graph.ngql.connection.connection import run_ngql
+from nebula_model.ngql.connection.connection import run_ngql
 from enum import Enum
 
 

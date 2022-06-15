@@ -1,7 +1,7 @@
 from enum import Enum
 
-from graph.ngql.schema import data_types
-from graph.ngql.statements.core import Statement
+from nebula_model.ngql.schema import data_types
+from nebula_model.ngql.statements.core import Statement
 
 
 class SchemaField(Statement):
