@@ -1,2 +1,0 @@
-example
-nebula_model
