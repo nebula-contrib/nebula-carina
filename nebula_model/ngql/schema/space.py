@@ -1,6 +1,8 @@
 from nebula_model.ngql.connection.connection import run_ngql
 from enum import Enum
 
+from nebula_model.utils.utils import read_str
+
 
 class VidTypeEnum(Enum):
     INT64 = 'INT64'
@@ -11,7 +13,7 @@ def show_spaces() -> list[str]:
     return [i.as_string() for i in run_ngql('SHOW SPACES;').column_values('Name')]
 
 
-def create_space(name: str, vid_desc: VidTypeEnum | tuple[VidTypeEnum, int], if_not_exists: bool = True):
+def make_vid_desc_string(vid_desc: VidTypeEnum | tuple[VidTypeEnum, int]):
     if isinstance(vid_desc, tuple):
         assert vid_desc[0] == VidTypeEnum.FIXED_STRING, 'only fixed string vid should be processed as tuple'
         assert isinstance(vid_desc[1], int) and vid_desc[1] > 0, 'fixed string vid must have a positive length'
@@ -19,7 +21,25 @@ def create_space(name: str, vid_desc: VidTypeEnum | tuple[VidTypeEnum, int], if_
     else:
         assert vid_desc == VidTypeEnum.INT64
         vid_desc = vid_desc.value
-    run_ngql(f'CREATE SPACE {"IF NOT EXISTS " if if_not_exists else ""}{name} (vid_type={vid_desc});')
+    return vid_desc
+
+
+def create_space(
+        name: str, vid_desc: VidTypeEnum | tuple[VidTypeEnum, int],
+        *,
+        if_not_exists: bool = True, partition_num: int = 100, replica_factor: int = 1, comment: str = None
+):
+    additional_descriptions = {
+        'vid_type': make_vid_desc_string(vid_desc),
+        'partition_num': partition_num,
+        'replica_factor': replica_factor,
+    }
+    if comment:
+        additional_descriptions['comment'] = f'"{comment}"'
+    run_ngql(
+        f'CREATE SPACE {"IF NOT EXISTS " if if_not_exists else ""}{name} '
+        f'({", ".join("%s=%s" % (k, v) for k, v in additional_descriptions.items())});'
+    )
 
 
 def use_space(name):
@@ -35,4 +55,5 @@ def drop_space(name: str, if_exists: bool = True):
 
 
 def describe_space(name: str):
-    run_ngql(f'DESCRIBE SPACE {name};')
+    result = run_ngql(f'DESCRIBE SPACE {name};')
+    return {k: read_str(v.value) for k, v in zip(result.keys(), result.rows()[0].values)}
