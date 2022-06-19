@@ -3,7 +3,6 @@ import unittest
 from nebula_model.ngql.errors import NGqlError
 from nebula_model.ngql.schema.space import show_spaces, create_space, VidTypeEnum, drop_space, use_space, \
     describe_space, make_vid_desc_string
-from tests.base import TestWithNewSpace
 
 
 class TestSpace(unittest.TestCase):
@@ -32,8 +31,12 @@ class TestSpace(unittest.TestCase):
             result = describe_space(space_name)
             self.assertEqual(result['Partition Number'], kwargs.get('partition_num', 100))
             self.assertEqual(result['Replica Factor'], kwargs.get('replica_factor', 1))
-            self.assertEqual(result['Comment'], kwargs.get('Comment'))
+            self.assertEqual(result['Comment'], kwargs.get('comment'))
             self.assertEqual(result['Vid Type'], make_vid_desc_string(vid_type))
-            # TODO use_space   clear_space
         for space_name, vid_type, kwargs, exception in spaces:
-            drop_space(space_name)
+            if not exception:
+                drop_space(space_name)
+
+    def test_clear_space(self):
+        # TODO use_space   clear_space
+        pass

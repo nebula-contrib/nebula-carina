@@ -35,10 +35,10 @@ def create_space(
         'replica_factor': replica_factor,
     }
     if comment:
-        additional_descriptions['comment'] = f'"{comment}"'
+        comment = f' COMMENT="{comment}"'
     run_ngql(
         f'CREATE SPACE {"IF NOT EXISTS " if if_not_exists else ""}{name} '
-        f'({", ".join("%s=%s" % (k, v) for k, v in additional_descriptions.items())});'
+        f'({", ".join("%s=%s" % (k, v) for k, v in additional_descriptions.items())}){comment or ""};'
     )
 
 

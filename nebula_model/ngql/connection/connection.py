@@ -31,5 +31,5 @@ def run_ngql(ngql: str, session: Session = None) -> ResultSet:
         use_space(database_settings.default_space)
     result = session.execute(ngql)
     if result.error_code() < 0:
-        raise NGqlError(result.error_msg(), result.error_code())
+        raise NGqlError(result.error_msg(), result.error_code(), ngql)
     return result
