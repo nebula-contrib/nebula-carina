@@ -1,8 +1,11 @@
 import unittest
 
 from nebula_model.ngql.errors import NGqlError
+from nebula_model.ngql.schema.data_types import FixedString
+from nebula_model.ngql.schema.schema import create_schema_ngql
 from nebula_model.ngql.schema.space import show_spaces, create_space, VidTypeEnum, drop_space, use_space, \
     describe_space, make_vid_desc_string
+from nebula_model.ngql.statements.schema import SchemaType, SchemaField
 
 
 class TestSpace(unittest.TestCase):
@@ -10,7 +13,7 @@ class TestSpace(unittest.TestCase):
         spaces = [
             ('test_int', VidTypeEnum.INT64, {}, None),
             ('test_str', (VidTypeEnum.FIXED_STRING, 32), {}, None),
-            ('test_中文名', (VidTypeEnum.FIXED_STRING, 12), {}, None),
+            ('test_中文名', 'FIXED_STRING(12)', {}, None),
             ('test!???', (VidTypeEnum.FIXED_STRING, 12), {}, NGqlError),
             ('test_exists', VidTypeEnum.INT64, {}, None),
             ('test_exists', VidTypeEnum.INT64, {}, None),
@@ -27,7 +30,7 @@ class TestSpace(unittest.TestCase):
             else:
                 create_space(space_name, vid_type, **kwargs)
 
-            self.assertTrue(space_name in show_spaces())
+            self.assertIn(space_name, show_spaces())
             result = describe_space(space_name)
             self.assertEqual(result['Partition Number'], kwargs.get('partition_num', 100))
             self.assertEqual(result['Replica Factor'], kwargs.get('replica_factor', 1))
@@ -36,7 +39,15 @@ class TestSpace(unittest.TestCase):
         for space_name, vid_type, kwargs, exception in spaces:
             if not exception:
                 drop_space(space_name)
+                self.assertNotIn(space_name, show_spaces())
 
     def test_clear_space(self):
         # TODO use_space   clear_space
-        pass
+        space_name = 'test_clear'
+        create_space(space_name, VidTypeEnum.INT64)
+        self.assertIn(space_name, show_spaces())
+        use_space(space_name)
+        tag_name = "test_tag_on_space_clean"
+        create_schema_ngql(
+            SchemaType.TAG, tag_name, [SchemaField('random_prop', FixedString(20))]
+        )

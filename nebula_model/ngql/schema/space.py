@@ -13,8 +13,10 @@ def show_spaces() -> list[str]:
     return [i.as_string() for i in run_ngql('SHOW SPACES;').column_values('Name')]
 
 
-def make_vid_desc_string(vid_desc: VidTypeEnum | tuple[VidTypeEnum, int]):
-    if isinstance(vid_desc, tuple):
+def make_vid_desc_string(vid_desc: VidTypeEnum | tuple[VidTypeEnum, int] | str):
+    if isinstance(vid_desc, str):
+        return vid_desc
+    elif isinstance(vid_desc, tuple):
         assert vid_desc[0] == VidTypeEnum.FIXED_STRING, 'only fixed string vid should be processed as tuple'
         assert isinstance(vid_desc[1], int) and vid_desc[1] > 0, 'fixed string vid must have a positive length'
         vid_desc = vid_desc[0].value % vid_desc[1]
@@ -25,7 +27,7 @@ def make_vid_desc_string(vid_desc: VidTypeEnum | tuple[VidTypeEnum, int]):
 
 
 def create_space(
-        name: str, vid_desc: VidTypeEnum | tuple[VidTypeEnum, int],
+        name: str, vid_desc: VidTypeEnum | tuple[VidTypeEnum, int] | str,
         *,
         if_not_exists: bool = True, partition_num: int = 100, replica_factor: int = 1, comment: str = None
 ):
