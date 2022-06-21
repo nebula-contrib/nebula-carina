@@ -1,10 +1,12 @@
+import time
 import unittest
 
+from nebula_model.ngql.connection.connection import run_ngql
 from nebula_model.ngql.errors import NGqlError
 from nebula_model.ngql.schema.data_types import FixedString
-from nebula_model.ngql.schema.schema import create_schema_ngql
+from nebula_model.ngql.schema.schema import create_schema_ngql, describe_tag
 from nebula_model.ngql.schema.space import show_spaces, create_space, VidTypeEnum, drop_space, use_space, \
-    describe_space, make_vid_desc_string
+    describe_space, make_vid_desc_string, clear_space
 from nebula_model.ngql.statements.schema import SchemaType, SchemaField
 
 
@@ -42,12 +44,19 @@ class TestSpace(unittest.TestCase):
                 self.assertNotIn(space_name, show_spaces())
 
     def test_clear_space(self):
-        # TODO use_space   clear_space
         space_name = 'test_clear'
         create_space(space_name, VidTypeEnum.INT64)
         self.assertIn(space_name, show_spaces())
+        time.sleep(10)  # need 1 heartbeat
         use_space(space_name)
         tag_name = "test_tag_on_space_clean"
-        create_schema_ngql(
+        run_ngql(create_schema_ngql(
             SchemaType.TAG, tag_name, [SchemaField('random_prop', FixedString(20))]
-        )
+        ))
+        des1 = describe_tag(tag_name)
+        self.assertEqual(len(des1), 1)
+        clear_space(space_name)
+        self.assertEqual(des1, describe_tag(tag_name))
+        drop_space(space_name)
+        with self.assertRaises(NGqlError):
+            describe_tag(tag_name)
