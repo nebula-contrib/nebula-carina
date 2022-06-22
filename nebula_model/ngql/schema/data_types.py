@@ -106,6 +106,8 @@ class Date(DataType):
 
     @classmethod
     def ttype2python_type(cls, value: ttypes.DateTime | str):
+        if value is None:
+            return
         if value == 'date()':
             return ''
         if isinstance(value, ttypes.Date):
@@ -127,6 +129,8 @@ class Time(DataType):
 
     @classmethod
     def ttype2python_type(cls, value: ttypes.Time | str):
+        if value is None:
+            return
         if value == 'time()':
             return ''
         if isinstance(value, ttypes.Time):
@@ -148,6 +152,8 @@ class Datetime(DataType):
 
     @classmethod
     def ttype2python_type(cls, value: ttypes.DateTime | str):
+        if value is None:
+            return
         if value == 'datetime()':
             return ''
         if isinstance(value, ttypes.DateTime):

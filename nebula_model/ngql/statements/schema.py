@@ -18,9 +18,10 @@ class SchemaField(Statement):
         self.comment = comment
 
     def __str__(self):
+        comment = f' COMMENT "{self.comment}"' if self.comment else ''
         return f'{self.prop_name} {self.data_type} {"NULL" if self.nullable else "NOT NULL"}' \
                f'{f" DEFAULT {self.data_type.value2db_str(self.default)}" if self.default is not None else ""}' \
-               f'{f" COMMENT {self.comment}" if self.comment else ""}'
+               f'{comment}'
 
 
 class AlterType(Enum):

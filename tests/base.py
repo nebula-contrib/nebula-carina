@@ -1,4 +1,5 @@
 import string
+import time
 import unittest
 import random
 from nebula_model.ngql.schema.space import show_spaces, create_space, VidTypeEnum, drop_space, use_space
@@ -14,6 +15,7 @@ class TestWithNewSpace(unittest.TestCase):
         assert cls.test_int_space_name not in show_spaces()
         create_space(cls.test_string_space_name, (VidTypeEnum.FIXED_STRING, 20))
         create_space(cls.test_int_space_name, VidTypeEnum.INT64)
+        time.sleep(10)  # one heart beat
 
     @classmethod
     def tearDownClass(cls):
