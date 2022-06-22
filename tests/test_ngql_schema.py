@@ -3,7 +3,7 @@ import datetime
 from nebula_model.ngql.connection.connection import run_ngql
 from nebula_model.ngql.errors import NGqlError
 from nebula_model.ngql.schema import data_types
-from nebula_model.ngql.schema.schema import create_tag_ngql, describe_tag, show_tags, alter_tag_ngql
+from nebula_model.ngql.schema.schema import create_tag_ngql, describe_tag, show_tags, alter_tag_ngql, drop_tag_ngql
 from nebula_model.ngql.schema.space import use_space
 from nebula_model.ngql.statements.schema import SchemaField, Ttl, Alter, AlterType
 from tests.base import TestWithNewSpace
@@ -77,3 +77,5 @@ class TestSchema(TestWithNewSpace):
             if i.prop_name not in to_drop_property_names
         ]
         self.assertEqual(altered_schema, described_schema_fields)
+        run_ngql(drop_tag_ngql(tag_name))
+        self.assertNotIn(tag_name, show_tags())
