@@ -113,5 +113,5 @@ def alter_edge_ngql(
         ttl_definition: Optional[Ttl] = None
 ) -> str:
     return alter_schema_ngql(
-        SchemaType.TAG, edge_name, alter_definitions=alter_definitions, ttl_definition=ttl_definition
+        SchemaType.EDGE, edge_name, alter_definitions=alter_definitions, ttl_definition=ttl_definition
     )
