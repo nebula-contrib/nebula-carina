@@ -164,7 +164,7 @@ class Datetime(DataType):
     def value2db_str(cls, value):
         if value is None:
             return 'NULL'
-        if value == '':
+        if value == Datetime.auto:
             return 'datetime()'
         return f'datetime("{value}")'
 

@@ -1,4 +1,5 @@
 import datetime
+import time
 from collections import OrderedDict
 
 from nebula_model.ngql.connection.connection import run_ngql
@@ -14,7 +15,7 @@ from tests.base import TestWithNewSpace
 
 class TestRecord(TestWithNewSpace):
     def test_vertex(self):
-        use_space(self.test_int_space_name)
+        use_space(self.test_string_space_name)
         # create tag
         tag_name1 = 'tag1'
         schema_fields1 = [
@@ -41,14 +42,33 @@ class TestRecord(TestWithNewSpace):
             if_not_exists=True,
         )
         run_ngql(tag_ngql)
+        time.sleep(10)  # wait for a heart beat
 
         # play with vertex
         tags = OrderedDict()
         tags['tag1'] = ['test_int', 'test_string', 'test_datetime', 'ttl']
         tags['tag2'] = ['test_fix_string', 'test_bool', 'test_date', 'test_time']
         prop_values_dict = {
-            111: [282919282, "I'm a long string!" * 100, '', 291901],
-            112: ["I'm short", False, datetime.date(2000, 1, 1), datetime.time(3, 20, 3, 291)]
+            'vertex1': [
+                data_types.Int16.value2db_str(282919282),
+                data_types.String.value2db_str("I'm a long string!" * 100),
+                data_types.Datetime.value2db_str(data_types.Datetime.auto),
+                data_types.Int64.value2db_str(291901),
+                data_types.FixedString.value2db_str("I'm short"),
+                data_types.Bool.value2db_str(False),
+                data_types.Date.value2db_str(datetime.date(2000, 1, 1)),
+                data_types.Time.value2db_str(datetime.time(3, 20, 3, 291))
+            ],
+            'vertex2': [
+                data_types.Int16.value2db_str(-222),
+                data_types.String.value2db_str(''),
+                data_types.Datetime.value2db_str(datetime.datetime(2025, 3, 23, 18,29, 1, 190)),
+                data_types.Int64.value2db_str(1.1529215e18),
+                data_types.FixedString.value2db_str(None),
+                data_types.Bool.value2db_str(None),
+                data_types.Date.value2db_str(None),
+                data_types.Time.value2db_str(datetime.time(1, 1, 1, 1))
+            ],
         }
         run_ngql(insert_vertex_ngql(tags, prop_values_dict))
         res = match('(v)', 'v', limit=Limit(5))
