@@ -2,10 +2,12 @@ import datetime
 from collections import OrderedDict
 
 from nebula_model.ngql.connection.connection import run_ngql
+from nebula_model.ngql.query.match import match
 from nebula_model.ngql.record.vertex import insert_vertex_ngql
 from nebula_model.ngql.schema import data_types
 from nebula_model.ngql.schema.schema import create_tag_ngql
 from nebula_model.ngql.schema.space import use_space
+from nebula_model.ngql.statements.clauses import Limit
 from nebula_model.ngql.statements.schema import SchemaField, Ttl
 from tests.base import TestWithNewSpace
 
@@ -45,7 +47,10 @@ class TestRecord(TestWithNewSpace):
         tags['tag1'] = ['test_int', 'test_string', 'test_datetime', 'ttl']
         tags['tag2'] = ['test_fix_string', 'test_bool', 'test_date', 'test_time']
         prop_values_dict = {
-            111: ['test1', 33, True, 'test1another'],
-            112: ['test2', 15, False, 'test2another']
+            111: [282919282, "I'm a long string!" * 100, '', 291901],
+            112: ["I'm short", False, datetime.date(2000, 1, 1), datetime.time(3, 20, 3, 291)]
         }
-        insert_vertex_ngql(tags, prop_values_dict)
+        run_ngql(insert_vertex_ngql(tags, prop_values_dict))
+        res = match('(v)', 'v', limit=Limit(5))
+        print(1)
+        pass
