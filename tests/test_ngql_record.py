@@ -2,6 +2,8 @@ import datetime
 import time
 from collections import OrderedDict
 
+import pytz
+
 from nebula_model.ngql.connection.connection import run_ngql
 from nebula_model.ngql.query.match import match
 from nebula_model.ngql.record.vertex import insert_vertex_ngql
@@ -10,6 +12,8 @@ from nebula_model.ngql.schema.schema import create_tag_ngql
 from nebula_model.ngql.schema.space import use_space
 from nebula_model.ngql.statements.clauses import Limit
 from nebula_model.ngql.statements.schema import SchemaField, Ttl
+from nebula_model.settings import database_settings
+from nebula_model.utils.utils import read_str
 from tests.base import TestWithNewSpace
 
 
@@ -27,7 +31,7 @@ class TestRecord(TestWithNewSpace):
         tag_ngql = create_tag_ngql(
             tag_name1, schema_fields1,
             if_not_exists=True,
-            ttl_definition=Ttl(3, 'ttl')
+            ttl_definition=Ttl(0, 'ttl')
         )
         run_ngql(tag_ngql)
         tag_name2 = 'tag2'
@@ -42,35 +46,96 @@ class TestRecord(TestWithNewSpace):
             if_not_exists=True,
         )
         run_ngql(tag_ngql)
-        time.sleep(10)  # wait for a heart beat
+        time.sleep(20)  # wait for a heart beat
 
         # play with vertex
         tags = OrderedDict()
         tags['tag1'] = ['test_int', 'test_string', 'test_datetime', 'ttl']
         tags['tag2'] = ['test_fix_string', 'test_bool', 'test_date', 'test_time']
+        current_date = datetime.datetime.now().date()
+        tz = pytz.timezone(database_settings.timezone_name)
         prop_values_dict = {
             'vertex1': [
-                data_types.Int16.value2db_str(282919282),
+                data_types.Int16.value2db_str(32767),
                 data_types.String.value2db_str("I'm a long string!" * 100),
                 data_types.Datetime.value2db_str(data_types.Datetime.auto),
                 data_types.Int64.value2db_str(291901),
                 data_types.FixedString.value2db_str("I'm short"),
                 data_types.Bool.value2db_str(False),
                 data_types.Date.value2db_str(datetime.date(2000, 1, 1)),
-                data_types.Time.value2db_str(datetime.time(3, 20, 3, 291))
+                data_types.Time.value2db_str(datetime.time(3, 20, 3, 291, tzinfo=tz))
             ],
             'vertex2': [
                 data_types.Int16.value2db_str(-222),
                 data_types.String.value2db_str(''),
-                data_types.Datetime.value2db_str(datetime.datetime(2025, 3, 23, 18,29, 1, 190)),
+                data_types.Datetime.value2db_str(datetime.datetime(2025, 3, 23, 18,29, 1, 190, tzinfo=tz)),
                 data_types.Int64.value2db_str(1.1529215e18),
-                data_types.FixedString.value2db_str(None),
-                data_types.Bool.value2db_str(None),
-                data_types.Date.value2db_str(None),
-                data_types.Time.value2db_str(datetime.time(1, 1, 1, 1))
+                data_types.FixedString.value2db_str(''),
+                data_types.Bool.value2db_str(True),
+                data_types.Date.value2db_str(current_date),
+                data_types.Time.value2db_str(datetime.time(1, 1, 1, 1, tzinfo=tz))
             ],
         }
         run_ngql(insert_vertex_ngql(tags, prop_values_dict))
+        current_datetime = datetime.datetime.now(tz=tz)
+        time.sleep(1)
         res = match('(v)', 'v', limit=Limit(5))
-        print(1)
-        pass
+        v = res.column_values('v')[0].get_value().value
+        self.assertEqual(read_str(v.vid.value), 'vertex1')
+        self.assertEqual(len(v.tags), 2)
+        for tag in v.tags:
+            if read_str(tag.name) == 'tag2':
+                self.assertFalse(data_types.Bool.ttype2python_type(tag.props[b'test_bool'].value))
+                self.assertEqual(
+                    data_types.Date.ttype2python_type(tag.props[b'test_date'].value), datetime.date(2000, 1, 1)
+                )
+                self.assertEqual(data_types.Time.ttype2python_type(
+                    tag.props[b'test_time'].value), datetime.time(3, 20, 3, 291, tzinfo=tz)
+                )
+                self.assertEqual(
+                    data_types.FixedString.ttype2python_type(tag.props[b'test_fix_string'].value), "I'm short"
+                )
+            elif read_str(tag.name) == 'tag1':
+                self.assertEqual(
+                    data_types.Int16.ttype2python_type(tag.props[b'test_int'].value), 32767
+                )
+                self.assertEqual(
+                    data_types.String.ttype2python_type(tag.props[b'test_string'].value), "I'm a long string!" * 100
+                )
+                self.assertAlmostEqual(
+                    data_types.Datetime.ttype2python_type(tag.props[b'test_datetime'].value), current_datetime,
+                    delta=datetime.timedelta(seconds=3)
+                )
+                print(tag.props[b'ttl'])
+                self.assertEqual(
+                    data_types.Int64.ttype2python_type(tag.props[b'ttl'].value), 291901
+                )
+        v = res.column_values('v')[1].get_value().value
+        self.assertEqual(read_str(v.vid.value), 'vertex2')
+        self.assertEqual(len(v.tags), 2)
+        for tag in v.tags:
+            if read_str(tag.name) == 'tag2':
+                self.assertTrue(data_types.Bool.ttype2python_type(tag.props[b'test_bool'].value))
+                self.assertEqual(
+                    data_types.Date.ttype2python_type(tag.props[b'test_date'].value), current_date
+                )
+                self.assertEqual(data_types.Time.ttype2python_type(
+                    tag.props[b'test_time'].value), datetime.time(1, 1, 1, 1, tzinfo=tz)
+                )
+                self.assertEqual(
+                    data_types.FixedString.ttype2python_type(tag.props[b'test_fix_string'].value), ""
+                )
+            elif read_str(tag.name) == 'tag1':
+                self.assertEqual(
+                    data_types.Int16.ttype2python_type(tag.props[b'test_int'].value), -222
+                )
+                self.assertEqual(
+                    data_types.String.ttype2python_type(tag.props[b'test_string'].value), ''
+                )
+                self.assertEqual(
+                    data_types.Datetime.ttype2python_type(tag.props[b'test_datetime'].value),
+                    datetime.datetime(2025, 3, 23, 18, 29, 1, 190, tzinfo=tz)
+                )
+                self.assertEqual(
+                    data_types.Int64.ttype2python_type(tag.props[b'ttl'].value), 1.1529215e18
+                )

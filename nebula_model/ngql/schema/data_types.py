@@ -1,7 +1,10 @@
 from datetime import datetime, date, time
 
+import pytz
+
 from nebula_model.utils.utils import pascal_case_to_snake_case, read_str
 from nebula3.common import ttypes
+from nebula_model.settings import database_settings
 
 data_type_factory = {}
 ttype2data_type = {}
@@ -134,7 +137,10 @@ class Time(DataType):
         if value == 'time()':
             return ''
         if isinstance(value, ttypes.Time):
-            return time(value.hour, value.minute, value.sec, value.microsec)
+            return time(
+                value.hour, value.minute, value.sec, value.microsec,
+                tzinfo=pytz.timezone(database_settings.timezone_name)
+            )
         raise RuntimeError('Unknown default value')
 
     @classmethod
@@ -157,7 +163,10 @@ class Datetime(DataType):
         if value == 'datetime()':
             return ''
         if isinstance(value, ttypes.DateTime):
-            return datetime(value.year, value.month, value.day, value.hour, value.minute, value.sec, value.microsec)
+            return datetime(
+                value.year, value.month, value.day, value.hour, value.minute, value.sec, value.microsec,
+                tzinfo=pytz.timezone(database_settings.timezone_name)
+            )
         raise RuntimeError('Unknown default value')
 
     @classmethod

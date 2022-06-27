@@ -10,6 +10,7 @@ class DatabaseSettings(BaseSettings):
     password: str
     default_space: str = 'main'
     model_paths: Set[str] = set()
+    timezone_name: str = 'UTC'
 
     class Config:
         env_prefix = 'nebula_'
