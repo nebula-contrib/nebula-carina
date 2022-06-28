@@ -106,7 +106,6 @@ class TestRecord(TestWithNewSpace):
                     data_types.Datetime.ttype2python_type(tag.props[b'test_datetime'].value), current_datetime,
                     delta=datetime.timedelta(seconds=3)
                 )
-                print(tag.props[b'ttl'])
                 self.assertEqual(
                     data_types.Int64.ttype2python_type(tag.props[b'ttl'].value), 291901
                 )

@@ -58,4 +58,3 @@ def delete_vertex_ngql(vid_list: list[int | str], with_edge: bool = True):
 
 def delete_tag_ngql(tag_names: list[str], vid: str | int):
     return f'DELETE TAG {",".join(tag_names)} FROM {vid2str(vid)};'
-
