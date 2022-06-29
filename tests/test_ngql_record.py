@@ -6,7 +6,7 @@ import pytz
 
 from nebula_model.ngql.connection.connection import run_ngql
 from nebula_model.ngql.query.match import match
-from nebula_model.ngql.record.vertex import insert_vertex_ngql
+from nebula_model.ngql.record.vertex import insert_vertex_ngql, update_vertex_ngql
 from nebula_model.ngql.schema import data_types
 from nebula_model.ngql.schema.schema import create_tag_ngql
 from nebula_model.ngql.schema.space import use_space
@@ -138,3 +138,35 @@ class TestRecord(TestWithNewSpace):
                 self.assertEqual(
                     data_types.Int64.ttype2python_type(tag.props[b'ttl'].value), 1.1529215e18
                 )
+
+        # update_vertex_ngql
+        next_now = data_types.Datetime.value2db_str(datetime.datetime.now(tz=tz))
+        run_ngql(update_vertex_ngql('tag1', 'vertex1', {
+            'test_int': data_types.Int16.value2db_str(122),
+            'test_datetime': next_now
+        }))
+        res = match('(v: tag1)', 'v', 'id(v) == "vertex1"')
+        v = res.column_values('v')[0].get_value().value
+        self.assertEqual(read_str(v.vid.value), 'vertex1')
+        self.assertEqual(len(v.tags), 2)
+        for tag in v.tags:
+            if read_str(tag.name) == 'tag1':
+                self.assertEqual(
+                    data_types.Int16.ttype2python_type(tag.props[b'test_int'].value), 122
+                )
+                self.assertEqual(
+                    data_types.String.ttype2python_type(tag.props[b'test_string'].value), "I'm a long string!" * 100
+                )
+                self.assertEqual(
+                    data_types.Datetime.ttype2python_type(tag.props[b'test_datetime'].value), next_now
+                )
+                self.assertEqual(
+                    data_types.Int64.ttype2python_type(tag.props[b'ttl'].value), 291901
+                )
+        # update_vertex_ngql  with condition
+        # update_vertex_ngql yield output
+        # upsert_vertex_ngql  (with condition  yield output)
+        # delete_tag_ngql
+        # delete_tag_ngql  (all tags deleted)
+        # delete_vertex_ngql    (with edge)
+        pass
