@@ -14,6 +14,7 @@ from typing import Iterable, Type
 # MATCH (v:player{name:"Tim Duncan"})-[e:follow|:serve]->(v2) RETURN e;
 # MATCH (v:player{name:"Tim Duncan"})-[]->(v2)<-[e:serve]-(v3) RETURN v2, v3;
 from nebula_model.models.abstract import NebulaAdaptor
+from nebula_model.ngql.query.conditions import Condition
 from nebula_model.ngql.query.match import match, OrderBy, Limit
 
 
@@ -22,7 +23,7 @@ class ModelBuilder(object):
     def match(
             pattern: str, to_model_dict: dict[str, Type[NebulaAdaptor]],  # should be model
             *,
-            condition: str = None, order_by: OrderBy = None, limit: Limit = None
+            condition: Condition = None, order_by: OrderBy = None, limit: Limit = None
     ) -> Iterable[dict[str, NebulaAdaptor]]:  # should be model
         results = match(pattern, ', '.join(to_model_dict.keys()), condition, order_by, limit)
         return (
