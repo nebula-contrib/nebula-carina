@@ -5,6 +5,7 @@ from collections import OrderedDict
 import pytz
 
 from nebula_model.ngql.connection.connection import run_ngql
+from nebula_model.ngql.query.conditions import RawCondition
 from nebula_model.ngql.query.match import match
 from nebula_model.ngql.record.vertex import insert_vertex_ngql, update_vertex_ngql
 from nebula_model.ngql.schema import data_types
@@ -145,7 +146,7 @@ class TestRecord(TestWithNewSpace):
             'test_int': data_types.Int16.value2db_str(122),
             'test_datetime': next_now
         }))
-        res = match('(v: tag1)', 'v', 'id(v) == "vertex1"')
+        res = match('(v: tag1)', 'v', RawCondition('id(v) == "vertex1"'))
         v = res.column_values('v')[0].get_value().value
         self.assertEqual(read_str(v.vid.value), 'vertex1')
         self.assertEqual(len(v.tags), 2)

@@ -2,6 +2,7 @@ from abc import ABC
 
 from nebula_model.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError
 from nebula_model.ngql.connection.connection import run_ngql
+from nebula_model.ngql.query.conditions import RawCondition
 from nebula_model.ngql.query.match import Limit
 from nebula_model.models.model_builder import ModelBuilder
 from nebula_model.ngql.record.edge import delete_edge_ngql
@@ -27,7 +28,11 @@ class BaseVertexManager(Manager):
     def get(self, vid: str | int):
         try:
             return list(
-                ModelBuilder.match('(v)', {'v': self.model}, condition=f"id(v) == {vid2str(vid)}", limit=Limit(1))
+                ModelBuilder.match(
+                    '(v)', {'v': self.model},
+                    condition=RawCondition(f"id(v) == {vid2str(vid)}"),
+                    limit=Limit(1)
+                )
             )[0]['v']
         except IndexError:
             raise VertexDoesNotExistError(vid)
@@ -48,8 +53,9 @@ class BaseEdgeManager(Manager):
             return list(
                 ModelBuilder.match(
                     '(v1)-[e]->(v2)', {'e': self.model},
-                    condition=f"id(v1) == {vid2str(edge_definition.src_vid)} "
-                              f"AND id(v2) == {vid2str(edge_definition.dst_vid)}"
+                    condition=RawCondition(
+                        f"id(v1) == {vid2str(edge_definition.src_vid)} AND id(v2) == {vid2str(edge_definition.dst_vid)}"
+                    )
                     , limit=Limit(1)
                 )
             )[0]['e']
