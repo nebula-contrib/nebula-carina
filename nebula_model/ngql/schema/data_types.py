@@ -1,3 +1,4 @@
+from abc import ABC
 from datetime import datetime, date, time
 
 import pytz
@@ -19,7 +20,7 @@ class DataTypeMetaClass(type):
                 ttype2data_type[getattr(cls, 'nebula_ttype')] = cls
 
 
-class DataType(object, metaclass=DataTypeMetaClass):
+class DataType(ABC, metaclass=DataTypeMetaClass):
     __slots__ = tuple()
 
     nebula_ttype = None
@@ -36,32 +37,40 @@ class DataType(object, metaclass=DataTypeMetaClass):
 
     @classmethod
     def value2db_str(cls, value):
+        raise NotImplementedError
+
+
+class Digit(DataType, ABC):
+    @classmethod
+    def value2db_str(cls, value):
         if value is None:
             return 'NULL'
+        if not str(value).isdigit():
+            raise ValueError('%s value should be None or digit' % cls.__name__)
         return str(value)
 
 
-class Int64(DataType):
+class Int64(Digit):
     pass
 
 
-class Int32(DataType):
+class Int32(Digit):
     pass
 
 
-class Int16(DataType):
+class Int16(Digit):
     pass
 
 
-class Int8(DataType):
+class Int8(Digit):
     pass
 
 
-class Float(DataType):
+class Float(Digit):
     pass
 
 
-class Double(DataType):
+class Double(Digit):
     pass
 
 
@@ -108,21 +117,22 @@ class Date(DataType):
     auto = ''
 
     @classmethod
-    def ttype2python_type(cls, value: ttypes.DateTime | str):
+    def ttype2python_type(cls, value: ttypes.Date | str):
         if value is None:
             return
         if value == 'date()':
             return ''
         if isinstance(value, ttypes.Date):
             return date(value.year, value.month, value.day)
-        raise RuntimeError('Unknown default value')
+        raise ValueError('Date value should be None or date')
 
     @classmethod
-    def value2db_str(cls, value):
+    def value2db_str(cls, value: None | str | time):
         if value is None:
             return 'NULL'
-        if value == '':
+        if value == Date.auto:
             return 'date()'
+        assert isinstance(value, time), 'Date python value should be None or datetime.date'
         return f'date("{value}")'
 
 
@@ -141,14 +151,15 @@ class Time(DataType):
                 value.hour, value.minute, value.sec, value.microsec,
                 tzinfo=pytz.timezone(database_settings.timezone_name)
             )
-        raise RuntimeError('Unknown default value')
+        raise ValueError('Time value should be None or Time')
 
     @classmethod
-    def value2db_str(cls, value):
+    def value2db_str(cls, value: None | str | time):
         if value is None:
             return 'NULL'
-        if value == '':
+        if value == Time.auto:
             return 'time()'
+        assert isinstance(value, time), 'DateTime python value should be None or datetime.time'
         return f'time("{value}")'
 
 
@@ -167,14 +178,15 @@ class Datetime(DataType):
                 value.year, value.month, value.day, value.hour, value.minute, value.sec, value.microsec,
                 tzinfo=pytz.timezone(database_settings.timezone_name)
             )
-        raise RuntimeError('Unknown default value')
+        raise ValueError('DateTime ngql value should be None or DateTime')
 
     @classmethod
-    def value2db_str(cls, value):
+    def value2db_str(cls, value: None | str | datetime):
         if value is None:
             return 'NULL'
         if value == Datetime.auto:
             return 'datetime()'
+        assert isinstance(value, datetime), 'DateTime python value should be None or datetime.datetime'
         return f'datetime("{value}")'
 
 
