@@ -9,6 +9,7 @@ from nebula_model.settings import database_settings
 
 data_type_factory = {}
 ttype2data_type = {}
+python_type2data_type = {}
 
 
 class DataTypeMetaClass(type):
@@ -18,12 +19,16 @@ class DataTypeMetaClass(type):
             data_type_factory[pascal_case_to_snake_case(cls.__name__).upper()] = cls
             if hasattr(cls, 'nebula_ttype'):
                 ttype2data_type[getattr(cls, 'nebula_ttype')] = cls
+                if getattr(cls, 'is_data_type_for_auto_convert', False):
+                    python_type2data_type[getattr(cls, 'python_data_type')] = cls
 
 
 class DataType(ABC, metaclass=DataTypeMetaClass):
     __slots__ = tuple()
 
     nebula_ttype = None
+    python_data_type = None
+    is_data_type_for_auto_convert = False
 
     def __str__(self):
         return pascal_case_to_snake_case(self.__class__.__name__).upper()
@@ -51,30 +56,35 @@ class Digit(DataType, ABC):
 
 
 class Int64(Digit):
-    pass
+    python_data_type = int
+    is_data_type_for_auto_convert = True
 
 
 class Int32(Digit):
-    pass
+    python_data_type = int
 
 
 class Int16(Digit):
-    pass
+    python_data_type = int
 
 
 class Int8(Digit):
-    pass
+    python_data_type = int
 
 
 class Float(Digit):
-    pass
+    python_data_type = float
 
 
 class Double(Digit):
-    pass
+    python_data_type = float
+    is_data_type_for_auto_convert = True
 
 
 class String(DataType):
+    python_data_type = str
+    is_data_type_for_auto_convert = True
+
     @classmethod
     def value2db_str(cls, value):
         if value is None:
@@ -83,6 +93,8 @@ class String(DataType):
 
 
 class FixedString(DataType):
+    python_data_type = str
+
     __slots__ = ('max_length', )
 
     def __init__(self, max_length):
@@ -105,6 +117,9 @@ class FixedString(DataType):
 
 
 class Bool(DataType):
+    python_data_type = bool
+    is_data_type_for_auto_convert = True
+
     @classmethod
     def value2db_str(cls, value):
         if value is None:
@@ -115,6 +130,8 @@ class Bool(DataType):
 class Date(DataType):
     nebula_ttype = ttypes.Date
     auto = ''
+    python_data_type = date
+    is_data_type_for_auto_convert = True
 
     @classmethod
     def ttype2python_type(cls, value: ttypes.Date | str):
@@ -139,6 +156,8 @@ class Date(DataType):
 class Time(DataType):
     nebula_ttype = ttypes.Time
     auto = ''
+    python_data_type = time
+    is_data_type_for_auto_convert = True
 
     @classmethod
     def ttype2python_type(cls, value: ttypes.Time | str):
@@ -166,6 +185,8 @@ class Time(DataType):
 class Datetime(DataType):
     nebula_ttype = ttypes.DateTime
     auto = ''
+    python_data_type = datetime
+    is_data_type_for_auto_convert = True
 
     @classmethod
     def ttype2python_type(cls, value: ttypes.DateTime | str):
@@ -209,3 +230,7 @@ def string_to_data_type(db_type_string: str) -> DataType:
 
 def ttype2python_value(val:  any):
     return (ttype2data_type[type(val)] if type(val) in ttype2data_type else DataType).ttype2python_type(val)
+
+
+def auto_convert_value_to_db_str(val: any):
+    return (python_type2data_type[type(val)] if type(val) in python_type2data_type else DataType).value2db_str(val)
