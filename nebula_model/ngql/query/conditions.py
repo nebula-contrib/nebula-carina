@@ -42,8 +42,17 @@ class NodeConditionLeaf(Condition):
             self.patterns = patterns
         self.value = value
 
+    def make_pattern(self):
+        pattern = ''
+        for p in self.patterns:
+            if p == 'id':
+                pattern = f'id({pattern})'
+            else:
+                pattern += '.' + p if pattern else p
+        return pattern
+
     def __str__(self):
-        return f"{'.'.join(self.patterns)} {self.OPERATORS[self.__op]} {auto_convert_value_to_db_str(self.value)}"
+        return f"{self.make_pattern()} {self.OPERATORS[self.__op]} {auto_convert_value_to_db_str(self.value)}"
 
 
 class NodeCondition(Condition):
@@ -56,7 +65,7 @@ class NodeCondition(Condition):
 
     def __init__(self, *, _op: ConditionOperator = ConditionOperator.AND, **kwargs):
         self.__op = _op  # use an op to connect everyone
-        self.__leaves = [NodeConditionLeaf(key, val) for key, val in kwargs]
+        self.__leaves = [NodeConditionLeaf(key, val) for key, val in kwargs.items()]
 
     def __str__(self):
         if self.__op == ConditionOperator.NOT:
@@ -78,3 +87,7 @@ class NodeCondition(Condition):
 
     def __neg__(self):
         return self.__init_by_leaves(ConditionOperator.NOT, [self])
+
+
+# short names
+Q = NodeCondition

@@ -6,7 +6,7 @@ from example.models import VirtualCharacterVertex, KillEdge, Kill, Figure, Sourc
 from nebula_model.models.migrations import make_migrations, migrate
 from nebula_model.models.model_builder import ModelBuilder
 from nebula_model.ngql.connection.connection import run_ngql
-from nebula_model.ngql.query.conditions import RawCondition
+from nebula_model.ngql.query.conditions import RawCondition, Q
 from nebula_model.ngql.query.match import Limit
 from nebula_model.ngql.record.edge import insert_edge_ngql
 from nebula_model.ngql.statements.edge import EdgeValue
@@ -77,7 +77,11 @@ async def root():
     # k.save()
     # list(ModelBuilder.match('() -[e]-> ()', {'e': KillEdge}, limit=Limit(50)))
     # print(list(ModelBuilder.match('(v)', {'v': VirtualCharacterVertex}, limit=Limit(10))))
-    return ModelBuilder.match(
+    ModelBuilder.match(
         '(v)-[e:kill]->(v2)', {'v': VirtualCharacterVertex, 'e': KillEdge, 'v2': VirtualCharacterVertex},
         condition=RawCondition('id(v) == 112'),
+    )
+    return ModelBuilder.match(
+        '(v)-[e:kill]->(v2)', {'v': VirtualCharacterVertex, 'e': KillEdge, 'v2': VirtualCharacterVertex},
+        condition=(Q(v__id=112) | Q(v__id=113)),
     )

@@ -23,7 +23,7 @@ class DataTypeMetaClass(type):
                     python_type2data_type[getattr(cls, 'python_data_type')] = cls
 
 
-class DataType(ABC, metaclass=DataTypeMetaClass):
+class DataType(metaclass=DataTypeMetaClass):
     __slots__ = tuple()
 
     nebula_ttype = None
@@ -45,7 +45,7 @@ class DataType(ABC, metaclass=DataTypeMetaClass):
         raise NotImplementedError
 
 
-class Digit(DataType, ABC):
+class Digit(DataType):
     @classmethod
     def value2db_str(cls, value):
         if value is None:
