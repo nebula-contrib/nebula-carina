@@ -56,11 +56,11 @@ async def root():
     # VirtualCharacterVertex.objects.any()
     # run_ngql('UPDATE VERTEX ON figure 119 SET name = "卧槽", age=33;')
     # run_ngql(update_vertex_ngql('figure', 119, {'name':  "卧槽123", 'age': 40}))
-    VirtualCharacterVertex(
-        vid=201, figure=Figure(
-            name='test4', age=100, is_virtual=False, some_dt=datetime(2021, 3, 3, 0, 0, 0, 12)
-        ), source=Source(name='trytest4')
-    ).save()
+    # VirtualCharacterVertex(
+    #     vid=201, figure=Figure(
+    #         name='test4', age=100, is_virtual=False, some_dt=datetime(2021, 3, 3, 0, 0, 0, 12)
+    #     ), source=Source(name='trytest4')
+    # ).save()
     # VirtualCharacterVertex.objects.get(119)
     # # NEED INDEX TO FIGURE OUT
     # insert_edge = insert_edge_ngql(
@@ -77,11 +77,11 @@ async def root():
     # k.save()
     # list(ModelBuilder.match('() -[e]-> ()', {'e': KillEdge}, limit=Limit(50)))
     # print(list(ModelBuilder.match('(v)', {'v': VirtualCharacterVertex}, limit=Limit(10))))
-    ModelBuilder.match(
-        '(v)-[e:kill]->(v2)', {'v': VirtualCharacterVertex, 'e': KillEdge, 'v2': VirtualCharacterVertex},
-        condition=RawCondition('id(v) == 112'),
-    )
+    # ModelBuilder.match(
+    #     '(v)-[e:kill]->(v2)', {'v': VirtualCharacterVertex, 'e': KillEdge, 'v2': VirtualCharacterVertex},
+    #     condition=(Q(v__id=112) | Q(v__id=113)),
+    # )
     return ModelBuilder.match(
         '(v)-[e:kill]->(v2)', {'v': VirtualCharacterVertex, 'e': KillEdge, 'v2': VirtualCharacterVertex},
-        condition=(Q(v__id=112) | Q(v__id=113)),
+        condition=Q(v__id__in=[112, 113]),
     )

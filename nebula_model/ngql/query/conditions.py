@@ -29,7 +29,8 @@ class NodeConditionLeaf(Condition):
         'gte': '>=',
         'eq': '==',
         'lt': '<',
-        'gt': '>'
+        'gt': '>',
+        'in': 'IN'
     }
 
     def __init__(self, pattern, value):

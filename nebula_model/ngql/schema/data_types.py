@@ -233,4 +233,6 @@ def ttype2python_value(val:  any):
 
 
 def auto_convert_value_to_db_str(val: any):
+    if isinstance(val, list):
+        return f'[{", ".join([auto_convert_value_to_db_str(i) for i in val])}]'
     return (python_type2data_type[type(val)] if type(val) in python_type2data_type else DataType).value2db_str(val)
