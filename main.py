@@ -81,6 +81,9 @@ async def root():
     #     '(v)-[e:kill]->(v2)', {'v': VirtualCharacterVertex, 'e': KillEdge, 'v2': VirtualCharacterVertex},
     #     condition=(Q(v__id=112) | Q(v__id=113)),
     # )
+    # v
+    # VirtualCharacterVertex()
+    # N(VirtualCharacterVertex) >> 2 << 3
     return ModelBuilder.match(
         '(v)-[e:kill]->(v2)', {'v': VirtualCharacterVertex, 'e': KillEdge, 'v2': VirtualCharacterVertex},
         condition=Q(v__id__in=[112, 113]),
