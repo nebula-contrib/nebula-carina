@@ -10,7 +10,7 @@ class VidTypeEnum(Enum):
 
 
 def show_spaces() -> list[str]:
-    return [i.as_string() for i in run_ngql('SHOW SPACES;').column_values('Name')]
+    return [i.as_string() for i in run_ngql('SHOW SPACES;', is_spacial_operation=True).column_values('Name')]
 
 
 def make_vid_desc_string(vid_desc: VidTypeEnum | tuple[VidTypeEnum, int] | str):
@@ -40,22 +40,23 @@ def create_space(
         comment = f' COMMENT="{comment}"'
     run_ngql(
         f'CREATE SPACE {"IF NOT EXISTS " if if_not_exists else ""}{name} '
-        f'({", ".join("%s=%s" % (k, v) for k, v in additional_descriptions.items())}){comment or ""};'
+        f'({", ".join("%s=%s" % (k, v) for k, v in additional_descriptions.items())}){comment or ""};',
+        is_spacial_operation=True
     )
 
 
 def use_space(name):
-    run_ngql(f'USE {name};')
+    run_ngql(f'USE {name};', is_spacial_operation=True)
 
 
 def clear_space(name: str, if_exists: bool = True):
-    run_ngql(f'CLEAR SPACE {"IF EXISTS " if if_exists else ""}{name};')
+    run_ngql(f'CLEAR SPACE {"IF EXISTS " if if_exists else ""}{name};', is_spacial_operation=True)
 
 
 def drop_space(name: str, if_exists: bool = True):
-    run_ngql(f'DROP SPACE {"IF EXISTS " if if_exists else ""}{name};')
+    run_ngql(f'DROP SPACE {"IF EXISTS " if if_exists else ""}{name};', is_spacial_operation=True)
 
 
 def describe_space(name: str):
-    result = run_ngql(f'DESCRIBE SPACE {name};')
+    result = run_ngql(f'DESCRIBE SPACE {name};', is_spacial_operation=True)
     return {k: read_str(v.value) for k, v in zip(result.keys(), result.rows()[0].values)}
