@@ -39,5 +39,9 @@ class VirtualCharacterVertex(models.VertexModel):
     source: Optional[Source]
 
 
+class BelongEdge(models.EdgeModel):
+    belong: Belong
+
+
 class KillEdge(models.EdgeModel):
     kill: Kill
