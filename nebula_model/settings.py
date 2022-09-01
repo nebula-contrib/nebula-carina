@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Set, Optional
 
 from pydantic import BaseSettings
 
@@ -9,6 +9,8 @@ class DatabaseSettings(BaseSettings):
     user_name: str
     password: str
     default_space: str = 'main'
+    auto_create_default_space_with_vid_desc: Optional[str]
+
     model_paths: Set[str] = set()
     timezone_name: str = 'UTC'
 

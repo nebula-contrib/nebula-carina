@@ -5,6 +5,9 @@ from nebula3.Config import Config
 from nebula_model.ngql.errors import NGqlError, DefaultSpaceNotExistError
 from nebula_model.settings import database_settings
 
+
+# TODO: fix connection / connection pool / session in a robust way later
+
 config = Config()
 config.max_connection_pool_size = database_settings.max_connection_pool_size
 connection_pool = ConnectionPool()
@@ -38,3 +41,12 @@ def run_ngql(
     if result.error_code() < 0:
         raise NGqlError(result.error_msg(), result.error_code(), ngql)
     return result
+
+
+from nebula_model.ngql.schema.space import create_space, show_spaces  # noqa
+if database_settings.auto_create_default_space_with_vid_desc and database_settings.default_space not in show_spaces():
+    create_space(
+        database_settings.default_space,
+        database_settings.auto_create_default_space_with_vid_desc,
+        if_not_exists=True
+    )

@@ -1,6 +1,5 @@
 from nebula_model.ngql.connection.connection import run_ngql
 from enum import Enum
-
 from nebula_model.utils.utils import read_str
 
 
