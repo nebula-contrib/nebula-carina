@@ -107,7 +107,7 @@ from typing import Optional
 from nebula_model.models import models
 
 
-class VirtualCharacterVertex(models.VertexModel):
+class VirtualCharacter(models.VertexModel):
     figure: Figure
     source: Optional[Source]
 
@@ -136,14 +136,14 @@ migrate(make_migrations())
 ### Data Model Method
 ```python
 # create/update vertex
-VirtualCharacterVertex(
+VirtualCharacter(
     vid=201, figure=Figure(
         name='test4', age=100, is_virtual=False, some_dt=datetime(2021, 3, 3, 0, 0, 0, 12)
     ), source=Source(name='trytest4')
 ).save()
 
 # get by id
-VirtualCharacterVertex.objects.get(119)
+VirtualCharacter.objects.get(119)
 
 # create/update edge
 k = KillEdge(src_vid=112, dst_vid=113, ranking=0, kill=Kill(way='gun', times=20))
@@ -157,10 +157,10 @@ from nebula_model.models.model_builder import ModelBuilder
 from nebula_model.ngql.query.match import Limit
 
 
-ModelBuilder.match('(v)', {'v': VirtualCharacterVertex}, limit=Limit(10))
+ModelBuilder.match('(v)', {'v': VirtualCharacter}, limit=Limit(10))
 
 ModelBuilder.match(
-    '(v)-[e:kill]->(v2)', {'v': VirtualCharacterVertex, 'e': KillEdge, 'v2': VirtualCharacterVertex},
+    '(v)-[e:kill]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
     condition=Q(v__id__in=[112, 113]),
 )
 ```

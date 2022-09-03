@@ -3,23 +3,23 @@ from nebula_model.utils.utils import vid2str
 
 
 class EdgeDefinition(Statement):
-    __slots__ = ('src_vid', 'dst_vid', 'rank')
+    __slots__ = ('src_vid', 'dst_vid', 'ranking')
 
-    def __init__(self, src_vid: str | int, dst_vid: str | int, rank: int = 0):
+    def __init__(self, src_vid: str | int, dst_vid: str | int, ranking: int = 0):
         self.src_vid = src_vid
         self.dst_vid = dst_vid
-        self.rank = rank
+        self.ranking = ranking
 
     def __str__(self):
-        return f'{vid2str(self.src_vid)} -> {vid2str(self.dst_vid)}@{self.rank}'
+        return f'{vid2str(self.src_vid)} -> {vid2str(self.dst_vid)}@{self.ranking}'
 
 
 class EdgeValue(Statement):
-    __slots__ = ('edge_direction', 'prop_values')
+    __slots__ = ('edge_definition', 'prop_values')
 
-    def __init__(self, src_vid: str | int, dst_vid: str | int, prop_values: list[any], rank: int = 0):
-        self.edge_direction = EdgeDefinition(src_vid, dst_vid, rank)
+    def __init__(self, src_vid: str | int, dst_vid: str | int, prop_values: list[any], ranking: int = 0):
+        self.edge_definition = EdgeDefinition(src_vid, dst_vid, ranking)
         self.prop_values = prop_values
 
     def __str__(self):
-        return f'{self.edge_direction}: ({", ".join(self.prop_values)})'
+        return f'{self.edge_definition}: ({", ".join(self.prop_values)})'

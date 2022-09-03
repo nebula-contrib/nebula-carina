@@ -34,14 +34,10 @@ class Kill(models.EdgeTypeModel):
     times: int = _(data_types.Int8, ..., )
 
 
-class VirtualCharacterVertex(models.VertexModel):
+class Support(models.EdgeTypeModel):
+    food_amount: int = _(data_types.Int16, ..., )
+
+
+class VirtualCharacter(models.VertexModel):
     figure: Figure
     source: Optional[Source]
-
-
-class BelongEdge(models.EdgeModel):
-    belong: Belong
-
-
-class KillEdge(models.EdgeModel):
-    kill: Kill

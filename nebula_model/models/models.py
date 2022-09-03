@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from copy import deepcopy
 from functools import partial
 from inspect import isclass
 
@@ -8,7 +9,7 @@ from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
 
 from nebula_model.models.abstract import NebulaAdaptor
-from nebula_model.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError
+from nebula_model.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError, DuplicateEdgeTypeNameError
 from nebula_model.models.fields import NebulaFieldInfo
 from nebula_model.models.managers import Manager, BaseVertexManager, BaseEdgeManager
 from nebula_model.ngql.connection.connection import run_ngql
@@ -22,7 +23,21 @@ from nebula_model.ngql.record.vertex import insert_vertex_ngql, update_vertex_ng
 from nebula_model.utils.utils import pascal_case_to_snake_case, read_str, classproperty
 
 
-class NebulaSchemaModel(BaseModel):
+_edge_type_model_factory = {}
+
+
+class NebulaSchemaModelMetaClass(ModelMetaclass):
+
+    def __init__(cls, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'EdgeTypeModel' in globals() and issubclass(cls, EdgeTypeModel):
+            db_name = cls.db_name()
+            if db_name in _edge_type_model_factory:
+                raise DuplicateEdgeTypeNameError(cls.__name__)
+            _edge_type_model_factory[db_name] = cls
+
+
+class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
 
     @classmethod
     def _create_db_fields(cls):
@@ -110,7 +125,6 @@ class EdgeTypeModel(NebulaSchemaModel):
 
 
 class NebulaRecordModelMetaClass(ModelMetaclass):
-
     def __new__(mcs, name, bases, namespace, **kwargs):
         cls = super().__new__(
             mcs, name, bases, {
@@ -120,9 +134,10 @@ class NebulaRecordModelMetaClass(ModelMetaclass):
         setattr(cls, '_managers', {})
         for base in cls.__bases__:
             if 'NebulaRecordModel' in globals() and issubclass(base, NebulaRecordModel):
-                cls._managers.update(base._managers)
+                cls._managers.update(deepcopy(base._managers))
         for name, field in namespace.items():
             if isinstance(field, Manager):
+                field = deepcopy(field)
                 cls._managers[name] = field
                 setattr(cls, name, classproperty(partial(lambda x, f: f, f=field)))
         return cls
@@ -132,6 +147,7 @@ class NebulaRecordModelMetaClass(ModelMetaclass):
         if hasattr(cls, '_managers'):
             for key, val in cls._managers.items():
                 if isinstance(val, Manager):
+                    setattr(cls, key, val)
                     val.register(cls)
 
 
@@ -142,6 +158,9 @@ class NebulaRecordModel(BaseModel, NebulaAdaptor, metaclass=NebulaRecordModelMet
 class VertexModel(NebulaRecordModel):
 
     vid: int | str
+    # TODO think about this
+    # tag_names: list[str] | None  # for view only
+    # tags: list[TagModel]
     objects = BaseVertexManager()
 
     @classmethod
@@ -202,21 +221,16 @@ class EdgeModel(NebulaRecordModel):
     src_vid: int | str
     dst_vid: int | str
     ranking: int = 0
+    edge_type_name: str | None  # for view only
+    edge_type: EdgeTypeModel  # only one edge type
     objects = BaseEdgeManager()
-    # it should have AN edge type model
+
+    def get_edge_type_and_model(self):
+        return self.edge_type.db_name(), self.edge_type.__class__
 
     @classmethod
     def from_nebula_db_cls(cls, raw_db_item: Vertex | Edge):
         return cls.from_edge(raw_db_item)
-
-    @classmethod
-    def get_edge_type_and_model(cls) -> tuple[str, EdgeTypeModel]:
-        edge_type_models = [
-            (name, field.type_) for name, field in cls.__fields__.items()
-            if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, EdgeTypeModel)
-        ]
-        assert len(edge_type_models) == 1
-        return edge_type_models[0]
 
     @classmethod
     def from_edge(cls, edge: Edge):
@@ -224,42 +238,42 @@ class EdgeModel(NebulaRecordModel):
         dst = read_str(edge.dst.value)
         edge_type_name = read_str(edge.name)
         ranking = edge.ranking
-        edge_type_name_in_model, edge_type = cls.get_edge_type_and_model()
-        assert edge_type_name == edge_type_name_in_model
-
+        # need a dict to hold all the edge types
+        edge_type = _edge_type_model_factory[edge_type_name]
         return cls(
             src_vid=src,
             dst_vid=dst,
             ranking=ranking,
-            **{edge_type_name: edge_type.from_props(edge.props)},
+            edge_type_name=edge_type_name,
+            edge_type=edge_type.from_props(edge.props),
         )
 
     def upsert(self):
-        name, edge_model = self.get_edge_type_and_model()
+        _, edge_model = self.get_edge_type_and_model()
         run_ngql(upsert_edge_ngql(
             edge_model.db_name(), EdgeDefinition(self.src_vid, self.dst_vid, self.ranking),
-            getattr(self, name).get_db_field_dict()
+            self.edge_type.get_db_field_dict()
         ))
 
     def save(self, *, if_not_exists: bool = False):
         #   并发不安全，如果需要并发安全，需要考虑upsert
+        _, edge_type_model = self.get_edge_type_and_model()
         try:
-            self.objects.get(EdgeDefinition(self.src_vid, self.dst_vid, self.ranking))
-            name, edge_type_model = self.get_edge_type_and_model()
+            self.objects.get(self.src_vid, self.dst_vid, self.edge_type.__class__)
+
             run_ngql(update_edge_ngql(
                 edge_type_model.db_name(),
                 EdgeDefinition(self.src_vid, self.dst_vid, self.ranking),
-                getattr(self, name).get_db_field_dict()
+                self.edge_type.get_db_field_dict()
             ))
         except EdgeDoesNotExistError:
-            edge_type_name, edge_type_model = self.get_edge_type_and_model()
             db_field_names = edge_type_model.get_db_field_names()
             ngql = insert_edge_ngql(
                 edge_type_model.db_name(), db_field_names,
                 [EdgeValue(
                     self.src_vid, self.dst_vid,
-                    [getattr(getattr(self, edge_type_name), field_name) for field_name in db_field_names],
-                    rank=self.ranking
+                    [self.edge_type.get_db_field_value(field_name) for field_name in db_field_names],
+                    ranking=self.ranking
                 )],
                 if_not_exists=if_not_exists
             )
