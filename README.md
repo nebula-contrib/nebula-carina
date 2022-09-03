@@ -203,3 +203,9 @@ ModelBuilder.match(
     condition=Q(v__id__in=[112, 113]),
 )
 ```
+
+## TODO List
+- [ ] Session Pool (might implement on nebula-python later)
+- [ ] More abstractions on different scenarios
+- [ ] Default values for schema models
+- [ ] Generic Vertex Model
