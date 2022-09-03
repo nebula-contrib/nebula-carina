@@ -36,7 +36,10 @@ class BaseVertexManager(Manager):
         return run_ngql(delete_vertex_ngql(vid_list, with_edge))
 
     # easy functions
-    def find_towards(self, edge_type, dst_vid: str | int, *, distinct=False):
+    def find_towards(
+            self, edge_type, dst_vid: str | int, *,
+            distinct=False, limit: Limit = None
+    ):
         if edge_type is None:
             from nebula_model.models.models import EdgeTypeModel
             edge_type = EdgeTypeModel
@@ -47,13 +50,18 @@ class BaseVertexManager(Manager):
                 distinct_field='v1' if distinct else None,
                 condition=RawCondition(
                     f"id(v2) == {vid2str(dst_vid)}"
-                )
+                ),
+                limit=limit
             )
         ]
 
 
 class BaseEdgeManager(Manager):
-    def find_between(self, src_vid: str | int, dst_vid: str | int, edge_type=None):
+    def find_between(
+            self, src_vid: str | int, dst_vid: str | int, edge_type=None,
+            *,
+            limit: Limit = None
+    ):
         # edge_type: EdgeTypeModel | None
         if edge_type is None:
             from nebula_model.models.models import EdgeTypeModel
@@ -63,7 +71,7 @@ class BaseEdgeManager(Manager):
                     f'(v1)-[e{edge_type.get_db_name_pattern()}]->(v2)', {'e': self.model},
                     condition=RawCondition(
                         f"id(v1) == {vid2str(src_vid)} AND id(v2) == {vid2str(dst_vid)}"
-                    )
+                    ), limit=limit
                 )
         ]
 
