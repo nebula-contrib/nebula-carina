@@ -161,18 +161,32 @@ EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Kill(
 EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Support(food_amount=400)).save()
 
 # get vertex by id
-VirtualCharacter.objects.get(119)
+character1 = VirtualCharacter.objects.get('char_test1')
+character2 = VirtualCharacter.objects.get('char_test2')
 
 # find all edges between vertexes
 EdgeModel.objects.find_between('char_test1', 'char_test2', limit=Limit(10))
 # find specific edges between vertexes
 EdgeModel.objects.find_between('char_test1', 'char_test2', Support)
+
 # find vertexes (sources) that go towards node by the specific edge type
-VirtualCharacter.objects.find_sources(Kill, 'char_test2', distinct=True, limit=Limit(1))
+VirtualCharacter.objects.find_sources('char_test2', Kill, distinct=True, limit=Limit(1))
 # Or just by any edge
-VirtualCharacter.objects.find_sources(None, 'char_test2')
+VirtualCharacter.objects.find_sources('char_test2')
+# or just
+character2.get_sources(Kill, VirtualCharacter)
+
 # similarly, find the destinations
 VirtualCharacter.objects.find_destinations('char_test1', Kill)
+# or
+character1.get_destinations(Kill, VirtualCharacter)
+
+# out edges & reverse edges
+character1.get_out_edges(Kill)
+character2.get_reverse_edges(Kill)
+# get edges & vertexes together
+character1.get_out_edge_and_destinations(Kill, VirtualCharacter)
+character2.get_reverse_edge_and_sources(Kill, VirtualCharacter)
 ```
 
 ### Model Builder

@@ -2,6 +2,7 @@ from collections import OrderedDict
 from copy import deepcopy
 from functools import partial
 from inspect import isclass
+from typing import Iterable
 
 from nebula3.common.ttypes import Vertex, Tag, Edge
 from pydantic import BaseModel
@@ -12,11 +13,14 @@ from nebula_model.models.abstract import NebulaAdaptor
 from nebula_model.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError, DuplicateEdgeTypeNameError
 from nebula_model.models.fields import NebulaFieldInfo
 from nebula_model.models.managers import Manager, BaseVertexManager, BaseEdgeManager
+from nebula_model.models.model_builder import ModelBuilder
 from nebula_model.ngql.connection.connection import run_ngql
+from nebula_model.ngql.query.conditions import Q
 from nebula_model.ngql.record.edge import update_edge_ngql, insert_edge_ngql, upsert_edge_ngql
 from nebula_model.ngql.schema.data_types import ttype2python_value
 from nebula_model.ngql.schema.schema import Ttl, Alter, \
     create_schema_ngql, describe_schema, alter_schema_ngql
+from nebula_model.ngql.statements.clauses import Limit
 from nebula_model.ngql.statements.edge import EdgeDefinition, EdgeValue
 from nebula_model.ngql.statements.schema import AlterType, SchemaType
 from nebula_model.ngql.record.vertex import insert_vertex_ngql, update_vertex_ngql, upsert_vertex_ngql
@@ -260,6 +264,42 @@ class VertexModel(NebulaRecordModel):
                 )
             ngql = insert_vertex_ngql(tag_props, {self.vid: data}, if_not_exists=if_not_exists)
             run_ngql(ngql)
+
+    def get_out_edges(self, edge_type: EdgeTypeModel = None, *, limit: Limit = None):
+        return EdgeModel.objects.find_by_source(self.vid, edge_type, limit=limit)
+
+    def get_out_edge_and_destinations(self, edge_type, dst_vertex_model, *, limit: Limit = None) \
+            -> Iterable[dict[str, NebulaAdaptor]]:
+        if edge_type is None:
+            edge_type = EdgeTypeModel
+        return (
+            {'edge': r['e'], 'dst': r['v2']} for r in ModelBuilder.match(
+                f'(v1)-[e{edge_type.get_db_name_pattern()}]->(v2{dst_vertex_model.get_db_name_pattern()})',
+                {'e': EdgeModel, 'v2': dst_vertex_model},
+                condition=Q(v1__id=self.vid), limit=limit
+            )
+        )
+
+    def get_destinations(self, edge_type, dst_vertex_model, *, distinct=False, limit: Limit = None):
+        return dst_vertex_model.objects.find_destinations(self.vid, edge_type, distinct=distinct, limit=limit)
+
+    def get_reverse_edges(self, edge_type: EdgeTypeModel = None, *, limit: Limit = None):
+        return EdgeModel.objects.find_by_destination(self.vid, edge_type, limit=limit)
+
+    def get_reverse_edge_and_sources(self, edge_type, src_vertex_model, *, limit: Limit = None) \
+            -> Iterable[dict[str, NebulaAdaptor]]:
+        if edge_type is None:
+            edge_type = EdgeTypeModel
+        return (
+            {'edge': r['e'], 'src': r['v1']} for r in ModelBuilder.match(
+                f'(v1{src_vertex_model.get_db_name_pattern()})-[e{edge_type.get_db_name_pattern()}]->(v2)',
+                {'e': EdgeModel, 'v1': src_vertex_model},
+                condition=Q(v2__id=self.vid), limit=limit
+            )
+        )
+
+    def get_sources(self, edge_type, src_vertex_model, *, distinct=False, limit: Limit = None):
+        return src_vertex_model.objects.find_sources(self.vid, edge_type, distinct=distinct, limit=limit)
 
 
 class EdgeModel(NebulaRecordModel):

@@ -37,7 +37,7 @@ class BaseVertexManager(Manager):
 
     # easy functions
     def find_sources(
-            self, edge_type, dst_vid: str | int, *,
+            self, dst_vid: str | int, edge_type, *,
             distinct=False, limit: Limit = None
     ):
         if edge_type is None:
@@ -81,7 +81,6 @@ class BaseEdgeManager(Manager):
             *,
             limit: Limit = None
     ):
-        # edge_type: EdgeTypeModel | None
         if edge_type is None:
             from nebula_model.models.models import EdgeTypeModel
             edge_type = EdgeTypeModel
@@ -90,6 +89,32 @@ class BaseEdgeManager(Manager):
                     f'(v1)-[e{edge_type.get_db_name_pattern()}]->(v2)', {'e': self.model},
                     condition=RawCondition(
                         f"id(v1) == {vid2str(src_vid)} AND id(v2) == {vid2str(dst_vid)}"
+                    ), limit=limit
+                )
+        ]
+
+    def find_by_source(self, src_vid: str, edge_type=None, *, limit: Limit = None):
+        if edge_type is None:
+            from nebula_model.models.models import EdgeTypeModel
+            edge_type = EdgeTypeModel
+        return [
+            r['e'] for r in ModelBuilder.match(
+                    f'(v1)-[e{edge_type.get_db_name_pattern()}]->()', {'e': self.model},
+                    condition=RawCondition(
+                        f"id(v1) == {vid2str(src_vid)}"
+                    ), limit=limit
+                )
+        ]
+
+    def find_by_destination(self, dst_vid: str, edge_type, *, limit: Limit = None):
+        if edge_type is None:
+            from nebula_model.models.models import EdgeTypeModel
+            edge_type = EdgeTypeModel
+        return [
+            r['e'] for r in ModelBuilder.match(
+                    f'()-[e{edge_type.get_db_name_pattern()}]->(v2)', {'e': self.model},
+                    condition=RawCondition(
+                        f"id(v2) == {vid2str(dst_vid)}"
                     ), limit=limit
                 )
         ]
