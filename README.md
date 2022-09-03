@@ -32,12 +32,13 @@ nebula_password=1234
 nebula_max_connection_pool_size=10
 nebula_model_paths='["example.models"]'
 nebula_default_space=main
+nebula_auto_create_default_space_with_vid_desc=FIXED_STRING(20)
 nebula_timezone_name=UTC
 ```
 
 You can export by:
 ```
-export nebula_model_paths='["example.models"]' nebula_password=1234 nebula_servers='["192.168.1.10:9669"]' nebula_user_name=root nebula_default_space=main
+export nebula_model_paths='["example.models"]' nebula_password=1234 nebula_servers='["192.168.1.10:9669"]' nebula_user_name=root nebula_default_space=main nebula_auto_create_default_space_with_vid_desc=FIXED_STRING(20)
 ```
 
 ## Example
@@ -50,6 +51,7 @@ main_space_name = "main"
 if main_space_name not in show_spaces():
     create_space(main_space_name, (VidTypeEnum.FIXED_STRING, 20))
 ```
+Or you can just set `nebula_auto_create_default_space_with_vid_desc=FIXED_STRING(20)` so that it will be automatically handled.
 
 ### Define Models
 Then, develop models defined in nebula_model_paths.
@@ -94,13 +96,13 @@ class Kill(models.EdgeTypeModel):
     way: str = _(data_types.FixedString(10), ..., )
     times: int = _(data_types.Int8, ..., )
 
-
-
+    
+class Support(models.EdgeTypeModel):
+    food_amount: int = _(data_types.Int16, ..., )
 ```
 
 #### Data Models
 * An VertexModel is used to define a nebula vertex.
-* An EdgeModel is used to define a nebula edge.
 
 ```python
 from typing import Optional
@@ -110,15 +112,9 @@ from nebula_model.models import models
 class VirtualCharacter(models.VertexModel):
     figure: Figure
     source: Optional[Source]
-
-
-class BelongEdge(models.EdgeModel):
-    belong: Belong
-
-
-class KillEdge(models.EdgeModel):
-    kill: Kill
 ```
+
+* An EdgeModel is used to define a nebula edge. But note that there will be no subclasses for edge model since we don't need it.
 
 ### Migrations
 use `make_migrations` and `migrate` to synchronize the schema to current space.
@@ -137,17 +133,37 @@ migrate(make_migrations())
 ```python
 # create/update vertex
 VirtualCharacter(
-    vid=201, figure=Figure(
-        name='test4', age=100, is_virtual=False, some_dt=datetime(2021, 3, 3, 0, 0, 0, 12)
-    ), source=Source(name='trytest4')
+    vid='char_test1', figure=Figure(
+        name='test1', age=100, is_virtual=False, some_dt=datetime(2021, 3, 3, 0, 0, 0, 12)
+    ), source=Source(name='movie1')
+).save()
+VirtualCharacter(
+    vid='char_test2', figure=Figure(
+        name='test2', age=30, is_virtual=False, some_dt=datetime(2021, 3, 3, 0, 0, 0, 12)
+    )
+).save()
+VirtualCharacter(
+    vid='char_test3', figure=Figure(
+        name='test3', age=200, is_virtual=True, some_dt=datetime(2022, 3, 3, 0, 0, 0, 12)
+    )
 ).save()
 
-# get by id
+# create/update edge
+EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Kill(way='gun', times=40)).save()
+# create/update another edge
+EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Support(food_amount=400)).save()
+
+# get vertex by id
 VirtualCharacter.objects.get(119)
 
-# create/update edge
-k = KillEdge(src_vid=112, dst_vid=113, ranking=0, kill=Kill(way='gun', times=20))
-k.save()
+# find all edges between vertexes
+EdgeModel.objects.find_between('char_test1', 'char_test2', limit=Limit(10))
+# find specific edges between vertexes
+EdgeModel.objects.find_between('char_test1', 'char_test2', Support)
+# find vertexes that go towards node by the specific edge type
+VirtualCharacter.objects.find_sources(Kill, 'char_test2', distinct=True, limit=Limit(1))
+# Or just by any edge
+VirtualCharacter.objects.find_sources(None, 'char_test2')
 ```
 
 ### Model Builder

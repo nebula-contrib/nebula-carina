@@ -185,7 +185,7 @@ class VertexModel(NebulaRecordModel):
         """
         for name, field in cls.__fields__.items():
             if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel):
-                yield name, field.type_
+                yield name, field.type_, field.required
 
     @classmethod
     def get_tag_name2model(cls) -> dict[str, TagModel]:
@@ -195,7 +195,7 @@ class VertexModel(NebulaRecordModel):
         e.g. {'figure': <class 'example.models.Figure'>, 'source1': <class 'example.models.Source'>}
         """
         return {
-            name: tag_model for name, tag_model in cls.iterate_tag_models()
+            name: tag_model for name, tag_model, _ in cls.iterate_tag_models()
         }
 
     @classmethod
@@ -221,11 +221,15 @@ class VertexModel(NebulaRecordModel):
         )
 
     @classmethod
-    def get_db_name_pattern(cls) -> str:
+    def get_db_name_pattern(cls, required_only=False) -> str:
+        # TODO: do we really need a "required" statement?
         """
         return the db names pattern e.g.  ":figure:source"
         """
-        return ''.join(tag_model.get_db_name_pattern() for _, tag_model in cls.iterate_tag_models())
+        return ''.join(
+            tag_model.get_db_name_pattern() for _, tag_model, required in cls.iterate_tag_models()
+            if not required_only or required
+        )
 
     def _get_tag_models(self):
         for name, field in self.__class__.__fields__.items():

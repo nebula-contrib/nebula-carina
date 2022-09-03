@@ -36,7 +36,7 @@ class BaseVertexManager(Manager):
         return run_ngql(delete_vertex_ngql(vid_list, with_edge))
 
     # easy functions
-    def find_towards(
+    def find_sources(
             self, edge_type, dst_vid: str | int, *,
             distinct=False, limit: Limit = None
     ):
@@ -50,6 +50,25 @@ class BaseVertexManager(Manager):
                 distinct_field='v1' if distinct else None,
                 condition=RawCondition(
                     f"id(v2) == {vid2str(dst_vid)}"
+                ),
+                limit=limit
+            )
+        ]
+
+    def find_destinations(
+            self, src_vid: str | int, edge_type, *,
+            distinct=False, limit: Limit = None
+    ):
+        if edge_type is None:
+            from nebula_model.models.models import EdgeTypeModel
+            edge_type = EdgeTypeModel
+        return [
+            r['v2'] for r in ModelBuilder.match(
+                f'(v1)-[e{edge_type.get_db_name_pattern()}]->(v2{self.model.get_db_name_pattern()})',
+                {'v2': self.model},
+                distinct_field='v2' if distinct else None,
+                condition=RawCondition(
+                    f"id(v1) == {vid2str(src_vid)}"
                 ),
                 limit=limit
             )
