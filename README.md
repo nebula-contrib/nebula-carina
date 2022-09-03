@@ -92,7 +92,7 @@ class Belong(models.EdgeTypeModel):
     pass
 
 
-class Kill(models.EdgeTypeModel):
+class Love(models.EdgeTypeModel):
     way: str = _(data_types.FixedString(10), ..., )
     times: int = _(data_types.Int8, ..., )
 
@@ -156,7 +156,7 @@ LimitedCharacter(
 # note that a VirtualCharacter could still be recognized as a LimitedCharacter, but a LimitedCharacter is not a VirtualCharacter
 
 # create/update edge
-EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Kill(way='gun', times=40)).save()
+EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Love(way='gun', times=40)).save()
 # create/update another edge
 EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Support(food_amount=400)).save()
 
@@ -170,26 +170,27 @@ EdgeModel.objects.find_between('char_test1', 'char_test2', limit=Limit(10))
 EdgeModel.objects.find_between('char_test1', 'char_test2', Support)
 
 # find vertexes (sources) that go towards node by the specific edge type
-VirtualCharacter.objects.find_sources('char_test2', Kill, distinct=True, limit=Limit(1))
+VirtualCharacter.objects.find_sources('char_test2', Love, distinct=True, limit=Limit(1))
 # Or just by any edge
 VirtualCharacter.objects.find_sources('char_test2')
 # or just
-character2.get_sources(Kill, VirtualCharacter)
+character2.get_sources(Love, VirtualCharacter)
 
 # similarly, find the destinations
-VirtualCharacter.objects.find_destinations('char_test1', Kill)
+VirtualCharacter.objects.find_destinations('char_test1', Love)
 # or
-character1.get_destinations(Kill, VirtualCharacter)
+character1.get_destinations(Love, VirtualCharacter)
 
 # out edges & reverse edges
-character1.get_out_edges(Kill)
-character2.get_reverse_edges(Kill)
+character1.get_out_edges(Love)
+character2.get_reverse_edges(Love)
 # get edges & vertexes together
-character1.get_out_edge_and_destinations(Kill, VirtualCharacter)
-character2.get_reverse_edge_and_sources(Kill, VirtualCharacter)
+character1.get_out_edge_and_destinations(Love, VirtualCharacter)
+character2.get_reverse_edge_and_sources(Love, VirtualCharacter)
 ```
 
 ### Model Builder
+* A easy model builder ready for you to build any ngql
 ```python
 from nebula_model.ngql.query.conditions import Q
 from nebula_model.models.model_builder import ModelBuilder
@@ -199,12 +200,15 @@ from nebula_model.ngql.query.match import Limit
 ModelBuilder.match('(v)', {'v': VirtualCharacter}, limit=Limit(10))
 
 ModelBuilder.match(
-    '(v)-[e:kill]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
+    '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
     condition=Q(v__id__in=[112, 113]),
 )
 ```
 
 ## TODO List
+- [ ] Indexes
+- [ ] TTL on schema
+- [ ] Go / Fetch / Lookup statements
 - [ ] Session Pool (might implement on nebula-python later)
 - [ ] More abstractions on different scenarios
 - [ ] Default values for schema models

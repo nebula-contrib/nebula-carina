@@ -29,7 +29,7 @@ class Belong(models.EdgeTypeModel):
     pass
 
 
-class Kill(models.EdgeTypeModel):
+class Love(models.EdgeTypeModel):
     way: str = _(data_types.FixedString(10), ..., )
     times: int = _(data_types.Int8, ..., )
 

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import FastAPI
 
-from example.models import VirtualCharacter, Kill, Figure, Source, Support, LimitedCharacter
+from example.models import VirtualCharacter, Love, Figure, Source, Support, LimitedCharacter
 from nebula_model.models.migrations import make_migrations, migrate
 from nebula_model.models.model_builder import ModelBuilder
 from nebula_model.models.models import EdgeModel
@@ -65,7 +65,7 @@ async def root():
     # VirtualCharacter.objects.get(119)
     # # NEED INDEX TO FIGURE OUT
     # insert_edge = insert_edge_ngql(
-    #         'kill', ['way', 'times'],
+    #         'love', ['way', 'times'],
     #         [
     #             EdgeValue(113, 119, ['knife', 3]),
     #             EdgeValue(115, 119, ['gun', 100])
@@ -74,12 +74,12 @@ async def root():
     # print(insert_edge)
     # run_ngql(insert_edge)
     # list(ModelBuilder.match('(v:figure{name: "trytest4"})', {'v': VirtualCharacter}, limit=Limit(50)))
-    # k = KillEdge(src_vid=112, dst_vid=113, ranking=0, kill=Kill(way='gun', times=20))
+    # k = KillEdge(src_vid=112, dst_vid=113, ranking=0, love=Love(way='gun', times=20))
     # k.save()
     # list(ModelBuilder.match('() -[e]-> ()', {'e': KillEdge}, limit=Limit(50)))
     # print(list(ModelBuilder.match('(v)', {'v': VirtualCharacter}, limit=Limit(10))))
     # ModelBuilder.match(
-    #     '(v)-[e:kill]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
+    #     '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
     #     condition=(Q(v__id=112) | Q(v__id=113)),
     # )
     # v
@@ -103,20 +103,20 @@ async def root():
     #         name='test3', age=200, is_virtual=True, some_dt=datetime(2022, 3, 3, 0, 0, 0, 12)
     #     ), source=Source(name='movie1')
     # ).save()
-    # EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Kill(way='gun', times=40)).save()
+    # EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Love(way='gun', times=40)).save()
     # return EdgeModel.objects.find_between('char_test1', 'char_test2')
     character1 = VirtualCharacter.objects.get('char_test1')
     character2 = VirtualCharacter.objects.get('char_test2')
-    character1.get_out_edges(Kill)
-    character2.get_reverse_edges(Kill)
-    character1.get_out_edge_and_destinations(Kill, VirtualCharacter)
-    character2.get_reverse_edge_and_sources(Kill, VirtualCharacter)
-    # return VirtualCharacter.objects.find_destinations('char_test1', Kill)
-    # return VirtualCharacter.objects.find_sources('char_test2', Kill, distinct=False, limit=Limit(1))
-    # return character2.get_sources(Kill, VirtualCharacter)
-    return character1.get_destinations(Kill, VirtualCharacter)
+    character1.get_out_edges(Love)
+    character2.get_reverse_edges(Love)
+    character1.get_out_edge_and_destinations(Love, VirtualCharacter)
+    character2.get_reverse_edge_and_sources(Love, VirtualCharacter)
+    # return VirtualCharacter.objects.find_destinations('char_test1', Love)
+    # return VirtualCharacter.objects.find_sources('char_test2', Love, distinct=False, limit=Limit(1))
+    # return character2.get_sources(Love, VirtualCharacter)
+    return character1.get_destinations(Love, VirtualCharacter)
     # return rst
     # return ModelBuilder.match(
-    #     '(v)-[e:kill]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
+    #     '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
     #     condition=Q(v__id__in=[112, 113]),
     # )
