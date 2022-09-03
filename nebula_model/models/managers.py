@@ -24,7 +24,7 @@ class BaseVertexManager(Manager):
         try:
             return list(
                 ModelBuilder.match(
-                    f'(v{self.model.get_tag_db_names_pattern()})', {'v': self.model},
+                    f'(v{self.model.get_db_name_pattern()})', {'v': self.model},
                     condition=RawCondition(f"id(v) == {vid2str(vid)}"),
                     limit=Limit(1)
                 )
@@ -35,13 +35,32 @@ class BaseVertexManager(Manager):
     def delete(self, vid_list: list[str, int], with_edge: bool = True):
         return run_ngql(delete_vertex_ngql(vid_list, with_edge))
 
+    # easy functions
+    def find_towards(self, edge_type, dst_vid: str | int, *, distinct=False):
+        if edge_type is None:
+            from nebula_model.models.models import EdgeTypeModel
+            edge_type = EdgeTypeModel
+        return [
+            r['v1'] for r in ModelBuilder.match(
+                f'(v1{self.model.get_db_name_pattern()})-[e{edge_type.get_db_name_pattern()}]->(v2)',
+                {'v1': self.model},
+                distinct_field='v1' if distinct else None,
+                condition=RawCondition(
+                    f"id(v2) == {vid2str(dst_vid)}"
+                )
+            )
+        ]
+
 
 class BaseEdgeManager(Manager):
     def find_between(self, src_vid: str | int, dst_vid: str | int, edge_type=None):
-        # edge_type: EdgeModel | None
+        # edge_type: EdgeTypeModel | None
+        if edge_type is None:
+            from nebula_model.models.models import EdgeTypeModel
+            edge_type = EdgeTypeModel
         return [
             r['e'] for r in ModelBuilder.match(
-                    f'(v1)-[e{(":" + edge_type.db_name()) if edge_type else ""}]->(v2)', {'e': self.model},
+                    f'(v1)-[e{edge_type.get_db_name_pattern()}]->(v2)', {'e': self.model},
                     condition=RawCondition(
                         f"id(v1) == {vid2str(src_vid)} AND id(v2) == {vid2str(dst_vid)}"
                     )

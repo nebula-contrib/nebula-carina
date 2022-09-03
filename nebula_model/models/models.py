@@ -117,11 +117,29 @@ class TagModel(NebulaSchemaModel):
     def from_tag(cls, tag: Tag):
         return cls(**{read_str(prop): ttype2python_value(value.value) for prop, value in tag.props.items()})
 
+    @classmethod
+    def get_db_name_pattern(cls) -> str:
+        """
+        return the db names pattern e.g.  ":figure:source"
+        """
+        if cls is TagModel:
+            return ''
+        return ':' + cls.db_name()
+
 
 class EdgeTypeModel(NebulaSchemaModel):
     @classmethod
     def from_props(cls, props: dict[str, any]):
         return cls(**{read_str(prop): read_str(value.value) for prop, value in props.items()})
+
+    @classmethod
+    def get_db_name_pattern(cls) -> str:
+        """
+        return the db names pattern e.g.  ":figure:source"
+        """
+        if cls is EdgeTypeModel:
+            return ''
+        return ':' + cls.db_name()
 
 
 class NebulaRecordModelMetaClass(ModelMetaclass):
@@ -203,11 +221,11 @@ class VertexModel(NebulaRecordModel):
         )
 
     @classmethod
-    def get_tag_db_names_pattern(cls) -> str:
+    def get_db_name_pattern(cls) -> str:
         """
         return the db names pattern e.g.  ":figure:source"
         """
-        return ''.join(':' + tag_model.db_name() for _, tag_model in cls.iterate_tag_models())
+        return ''.join(tag_model.get_db_name_pattern() for _, tag_model in cls.iterate_tag_models())
 
     def _get_tag_models(self):
         for name, field in self.__class__.__fields__.items():

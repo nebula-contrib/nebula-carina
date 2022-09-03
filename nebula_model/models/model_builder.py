@@ -8,10 +8,14 @@ class ModelBuilder(object):
     @staticmethod
     def match(
             pattern: str, to_model_dict: dict[str, Type[NebulaAdaptor]],  # should be model
-            *,
+            *, distinct_field: str = None,
             condition: Condition = None, order_by: OrderBy = None, limit: Limit = None
     ) -> Iterable[dict[str, NebulaAdaptor]]:  # should be model
-        results = match(pattern, ', '.join(to_model_dict.keys()), condition, order_by, limit)
+        output = ', '.join(
+            ("DISTINCT " if key == distinct_field else "") + key
+            for key in to_model_dict.keys()
+        )
+        results = match(pattern, output, condition, order_by, limit)
         return (
             {
                 key: to_model_dict[key].from_nebula_db_cls(value.value)

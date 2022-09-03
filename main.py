@@ -104,12 +104,9 @@ async def root():
     #         )
     #     ).save()
     # EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Kill(way='gun', times=40)).save()
-    # KillEdge(src_vid='char_test1', dst_vid='char_test2', ranking=0, kill=Kill(way='gun', times=20)).save()
-    # SupportEdge(src_vid='char_test1', dst_vid='char_test2', ranking=0, support=Support(food_amount=100)).save()
-    # SupportEdge.objects.get('char_test1', 'char_test2')
-    # KillEdge.objects.get('char_test1', 'char_test2')
-    # EdgeModel.objects.find_between('char_test1', 'char_test2')
-    return VirtualCharacter.objects.get('char_test1')
+    # return EdgeModel.objects.find_between('char_test1', 'char_test2')
+    # return VirtualCharacter.objects.get('char_test1')
+    return VirtualCharacter.objects.find_towards(None, 'char_test2', distinct=True)
     # return rst
     # return ModelBuilder.match(
     #     '(v)-[e:kill]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
