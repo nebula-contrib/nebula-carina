@@ -221,11 +221,11 @@ class VertexModel(NebulaRecordModel):
         )
 
     @classmethod
-    def get_db_name_pattern(cls, required_only=False) -> str:
-        # TODO: do we really need a "required" statement?
+    def get_db_name_pattern(cls) -> str:
         """
         return the db names pattern e.g.  ":figure:source"
         """
+        required_only = True  # TODO maybe we will allow non-required feature in future
         return ''.join(
             tag_model.get_db_name_pattern() for _, tag_model, required in cls.iterate_tag_models()
             if not required_only or required

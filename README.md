@@ -102,16 +102,19 @@ class Support(models.EdgeTypeModel):
 ```
 
 #### Data Models
-* An VertexModel is used to define a nebula vertex.
+* An VertexModel is used to define a nebula vertex. It does nothing to the schema.
 
 ```python
-from typing import Optional
 from nebula_model.models import models
 
 
 class VirtualCharacter(models.VertexModel):
     figure: Figure
-    source: Optional[Source]
+    source: Source
+
+
+class LimitedCharacter(models.VertexModel):
+    figure: Figure
 ```
 
 * An EdgeModel is used to define a nebula edge. But note that there will be no subclasses for edge model since we don't need it.
@@ -137,16 +140,20 @@ VirtualCharacter(
         name='test1', age=100, is_virtual=False, some_dt=datetime(2021, 3, 3, 0, 0, 0, 12)
     ), source=Source(name='movie1')
 ).save()
+
 VirtualCharacter(
     vid='char_test2', figure=Figure(
         name='test2', age=30, is_virtual=False, some_dt=datetime(2021, 3, 3, 0, 0, 0, 12)
-    )
+    ), source=Source(name='movie2')
 ).save()
-VirtualCharacter(
+
+LimitedCharacter(
     vid='char_test3', figure=Figure(
         name='test3', age=200, is_virtual=True, some_dt=datetime(2022, 3, 3, 0, 0, 0, 12)
     )
 ).save()
+
+# note that a VirtualCharacter could still be recognized as a LimitedCharacter, but a LimitedCharacter is not a VirtualCharacter
 
 # create/update edge
 EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Kill(way='gun', times=40)).save()
@@ -160,10 +167,12 @@ VirtualCharacter.objects.get(119)
 EdgeModel.objects.find_between('char_test1', 'char_test2', limit=Limit(10))
 # find specific edges between vertexes
 EdgeModel.objects.find_between('char_test1', 'char_test2', Support)
-# find vertexes that go towards node by the specific edge type
+# find vertexes (sources) that go towards node by the specific edge type
 VirtualCharacter.objects.find_sources(Kill, 'char_test2', distinct=True, limit=Limit(1))
 # Or just by any edge
 VirtualCharacter.objects.find_sources(None, 'char_test2')
+# similarly, find the destinations
+VirtualCharacter.objects.find_destinations('char_test1', Kill)
 ```
 
 ### Model Builder

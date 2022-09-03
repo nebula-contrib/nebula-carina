@@ -96,16 +96,16 @@ async def root():
     # VirtualCharacter(
     #     vid='char_test2', figure=Figure(
     #         name='test2', age=30, is_virtual=False, some_dt=datetime(2021, 3, 3, 0, 0, 0, 12)
-    #     )
+    #     ), source=Source(name='movie2')
     # ).save()
     # VirtualCharacter(
-    #         vid='char_test3', figure=Figure(
-    #             name='test3', age=200, is_virtual=True, some_dt=datetime(2022, 3, 3, 0, 0, 0, 12)
-    #         )
-    #     ).save()
+    #     vid='char_test3', figure=Figure(
+    #         name='test3', age=200, is_virtual=True, some_dt=datetime(2022, 3, 3, 0, 0, 0, 12)
+    #     ), source=Source(name='movie1')
+    # ).save()
     # EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Kill(way='gun', times=40)).save()
     # return EdgeModel.objects.find_between('char_test1', 'char_test2')
-    return VirtualCharacter.objects.get('char_test1')
+    # return VirtualCharacter.objects.get('char_test1')
     return VirtualCharacter.objects.find_destinations('char_test1', Kill)
     # return VirtualCharacter.objects.find_sources(Kill, 'char_test2', distinct=False, limit=Limit(1))
     # return rst

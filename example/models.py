@@ -40,7 +40,7 @@ class Support(models.EdgeTypeModel):
 
 class VirtualCharacter(models.VertexModel):
     figure: Figure
-    source: Optional[Source]
+    source: Source
 
 
 class LimitedCharacter(models.VertexModel):
