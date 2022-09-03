@@ -158,24 +158,40 @@ class NebulaRecordModel(BaseModel, NebulaAdaptor, metaclass=NebulaRecordModelMet
 class VertexModel(NebulaRecordModel):
 
     vid: int | str
-    # TODO think about this
-    # tag_names: list[str] | None  # for view only
-    # tags: list[TagModel]
     objects = BaseVertexManager()
 
     @classmethod
+    def iterate_tag_models(cls) -> tuple[str, TagModel]:
+        """
+        return the iterator of tuple[name, tag model] of this class
+        """
+        for name, field in cls.__fields__.items():
+            if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel):
+                yield name, field.type_
+
+    @classmethod
     def get_tag_name2model(cls) -> dict[str, TagModel]:
+        """
+        get the tag name towards the model
+        note that the tag name might be different from the tag's db name
+        e.g. {'figure': <class 'example.models.Figure'>, 'source1': <class 'example.models.Source'>}
+        """
         return {
-            name: field.type_ for name, field in cls.__fields__.items()
-            if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel)
+            name: tag_model for name, tag_model in cls.iterate_tag_models()
         }
 
     @classmethod
     def from_nebula_db_cls(cls, raw_db_item: Vertex | Edge):
+        """
+        convert nebula python vertex to VertexModel
+        """
         return cls.from_vertex(raw_db_item)
 
     @classmethod
     def from_vertex(cls, vertex: Vertex):
+        """
+        convert nebula python vertex to VertexModel
+        """
         vid = read_str(vertex.vid.value)
         tag_dict = cls.get_tag_name2model()
         return cls(
@@ -185,6 +201,13 @@ class VertexModel(NebulaRecordModel):
                 for tag in vertex.tags if read_str(tag.name) in tag_dict
             }
         )
+
+    @classmethod
+    def get_tag_db_names_pattern(cls) -> str:
+        """
+        return the db names pattern e.g.  ":figure:source"
+        """
+        return ''.join(':' + tag_model.db_name() for _, tag_model in cls.iterate_tag_models())
 
     def _get_tag_models(self):
         for name, field in self.__class__.__fields__.items():

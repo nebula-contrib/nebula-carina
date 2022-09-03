@@ -20,16 +20,11 @@ class Manager(ABC):
 
 
 class BaseVertexManager(Manager):
-    # def any(self, limit: Limit = Limit(10), order_by: OrderBy = None):
-    #     return [
-    #         item['v'] for item in ModelBuilder.match('(v)', {'v': self.model}, order_by=order_by, limit=limit)
-    #     ]
-
     def get(self, vid: str | int):
         try:
             return list(
                 ModelBuilder.match(
-                    '(v)', {'v': self.model},
+                    f'(v{self.model.get_tag_db_names_pattern()})', {'v': self.model},
                     condition=RawCondition(f"id(v) == {vid2str(vid)}"),
                     limit=Limit(1)
                 )
@@ -42,7 +37,7 @@ class BaseVertexManager(Manager):
 
 
 class BaseEdgeManager(Manager):
-    def between(self, src_vid: str | int, dst_vid: str | int, edge_type=None):
+    def find_between(self, src_vid: str | int, dst_vid: str | int, edge_type=None):
         # edge_type: EdgeModel | None
         return [
             r['e'] for r in ModelBuilder.match(
@@ -55,7 +50,7 @@ class BaseEdgeManager(Manager):
 
     def get(self, src_vid: str | int, dst_vid: str | int, edge_type):
         try:
-            return self.between(src_vid, dst_vid, edge_type)[0]
+            return self.find_between(src_vid, dst_vid, edge_type)[0]
         except IndexError:
             raise EdgeDoesNotExistError
 
