@@ -35,9 +35,7 @@ class LocalSession(object):
         with cls._lock:
             if not cls._instance:
                 cls._instance = super().__new__(cls)
-                cls._instance._main_session = connection_pool.get_session(
-                    user_name=database_settings.user_name, password=database_settings.password
-                )
+                cls._instance.create_session()
                 cls._instance._space_settled = False
         return cls._instance
 
@@ -45,11 +43,14 @@ class LocalSession(object):
     def session(self):
         return self._main_session
 
+    def create_session(self):
+        self._main_session = connection_pool.get_session(
+            user_name=database_settings.user_name, password=database_settings.password
+        )
+
     def recover_session(self):
         with self._lock:
-            self._main_session = connection_pool.get_session(
-                user_name=database_settings.user_name, password=database_settings.password
-            )
+            self.create_session()
             self.settle_space()
 
     def raw_use_space(self, name):
