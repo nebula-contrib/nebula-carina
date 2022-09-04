@@ -209,7 +209,7 @@ ModelBuilder.match(
 - [ ] Indexes
 - [ ] TTL on schema
 - [ ] Go / Fetch / Lookup statements
-- [ ] Session Pool (might implement on nebula-python later)
+- [x] Session Pool (partially, might implement a better one later base on nebula-python)
 - [ ] More abstractions on different scenarios
 - [ ] Default values for schema models
 - [ ] Generic Vertex Model
