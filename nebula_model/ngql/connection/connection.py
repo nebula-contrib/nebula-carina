@@ -74,7 +74,7 @@ class LocalSession(object):
     def space_settled(self):
         return self._space_settled
 
-    def run_ngql(self, ngql: str, *, is_spacial_operation=False):
+    def run_ngql(self, ngql: str, *, is_spacial_operation=False) -> ResultSet:
         if not is_spacial_operation and not self.space_settled:
             self.settle_space()
         try:
