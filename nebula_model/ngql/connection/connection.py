@@ -1,5 +1,8 @@
+import threading
+
+from nebula3.Exception import IOErrorException
 from nebula3.data import ResultSet
-from nebula3.gclient.net import ConnectionPool, Session
+from nebula3.gclient.net import ConnectionPool
 from nebula3.Config import Config
 
 from nebula_model.ngql.errors import NGqlError, DefaultSpaceNotExistError
@@ -20,27 +23,79 @@ def _split(server_address: str) -> tuple[str, int]:
 
 if not connection_pool.init([_split(i) for i in database_settings.servers], config):
     raise RuntimeError('Cannot connect to the connection pool')
-main_session = connection_pool.get_session(user_name=database_settings.user_name, password=database_settings.password)
-space_settled = False
+
+
+class LocalSession(object):
+    _lock = threading.Lock()
+    _instance = None
+    _main_session = None
+    _space_settled = False
+
+    def __new__(cls, *args, **kwargs):
+        with cls._lock:
+            if not cls._instance:
+                cls._instance = super().__new__(cls)
+                cls._instance._main_session = connection_pool.get_session(
+                    user_name=database_settings.user_name, password=database_settings.password
+                )
+                cls._instance._space_settled = False
+        return cls._instance
+
+    @property
+    def session(self):
+        return self._main_session
+
+    def recover_session(self):
+        with self._lock:
+            self._main_session = connection_pool.get_session(
+                user_name=database_settings.user_name, password=database_settings.password
+            )
+            self.settle_space()
+
+    def raw_use_space(self, name):
+        self._main_session.execute(f'USE {name};')
+
+    def raw_show_spaces(self) -> list[str]:
+        return [i.as_string() for i in self._main_session.execute('SHOW SPACES;').column_values('Name')]
+
+    def settle_space(self):
+        try:
+            if database_settings.default_space not in self.raw_show_spaces():
+                raise DefaultSpaceNotExistError(database_settings.default_space)
+            self.raw_use_space(database_settings.default_space)
+            self._space_settled = True
+        except (IOErrorException, RuntimeError):
+            if not self._main_session.ping():
+                LocalSession().recover_session()
+            else:
+                raise
+
+    @property
+    def space_settled(self):
+        return self._space_settled
+
+    def run_ngql(self, ngql: str, *, is_spacial_operation=False):
+        if not is_spacial_operation and not self.space_settled:
+            self.settle_space()
+        try:
+            print(ngql)
+            result = self._main_session.execute(ngql)
+        except (IOErrorException, RuntimeError):
+            if not self._main_session.ping():
+                self.recover_session()
+                result = self.session.execute(ngql)
+            else:
+                raise
+        if result.error_code() < 0:
+            raise NGqlError(result.error_msg(), result.error_code(), ngql)
+        return result
 
 
 def run_ngql(
-        ngql: str, session: Session = None, *,
+        ngql: str, *,
         is_spacial_operation=False
 ) -> ResultSet:
-    global space_settled
-    if not session:
-        session = main_session
-    if not is_spacial_operation and not space_settled:
-        space_settled = True
-        from nebula_model.ngql.schema.space import use_space, show_spaces
-        if database_settings.default_space not in show_spaces():
-            raise DefaultSpaceNotExistError(database_settings.default_space)
-        use_space(database_settings.default_space)
-    result = session.execute(ngql)
-    if result.error_code() < 0:
-        raise NGqlError(result.error_msg(), result.error_code(), ngql)
-    return result
+    return LocalSession().run_ngql(ngql, is_spacial_operation=is_spacial_operation)
 
 
 from nebula_model.ngql.schema.space import create_space, show_spaces  # noqa

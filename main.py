@@ -6,7 +6,7 @@ from example.models import VirtualCharacter, Love, Figure, Source, Support, Limi
 from nebula_model.models.migrations import make_migrations, migrate
 from nebula_model.models.model_builder import ModelBuilder
 from nebula_model.models.models import EdgeModel
-from nebula_model.ngql.connection.connection import run_ngql
+from nebula_model.ngql.connection.connection import run_ngql, LocalSession
 from nebula_model.ngql.query.conditions import RawCondition, Q
 from nebula_model.ngql.query.match import Limit
 from nebula_model.ngql.record.edge import insert_edge_ngql
@@ -106,6 +106,7 @@ async def root():
     # EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Love(way='gun', times=40)).save()
     # return EdgeModel.objects.find_between('char_test1', 'char_test2')
     character1 = VirtualCharacter.objects.get('char_test1')
+    LocalSession().session.release()
     character2 = VirtualCharacter.objects.get('char_test2')
     character1.get_out_edges(Love)
     character2.get_reverse_edges(Love)
@@ -114,7 +115,8 @@ async def root():
     # return VirtualCharacter.objects.find_destinations('char_test1', Love)
     # return VirtualCharacter.objects.find_sources('char_test2', Love, distinct=False, limit=Limit(1))
     # return character2.get_sources(Love, VirtualCharacter)
-    return character1.get_destinations(Love, VirtualCharacter)
+    # return character1.get_destinations(Love, VirtualCharacter)
+    return character1
     # return rst
     # return ModelBuilder.match(
     #     '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
