@@ -79,7 +79,6 @@ class LocalSession(object):
         if not is_spacial_operation and not self.space_settled:
             self.settle_space()
         try:
-            print(ngql)
             result = self._main_session.execute(ngql)
         except (IOErrorException, RuntimeError):
             if not self._main_session.ping():

@@ -229,7 +229,7 @@ class VertexModel(NebulaRecordModel):
         """
         return the db names pattern e.g.  ":figure:source"
         """
-        required_only = True  # TODO maybe we will allow non-required feature in future
+        required_only = True  # FIXME: maybe we will allow non-required feature in future
         return ''.join(
             tag_model.get_db_name_pattern() for _, tag_model, required in cls.iterate_tag_models()
             if not required_only or required
