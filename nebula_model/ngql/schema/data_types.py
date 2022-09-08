@@ -44,8 +44,12 @@ class DataType(metaclass=DataTypeMetaClass):
     def value2db_str(cls, value):
         raise NotImplementedError
 
+    @classmethod
+    def clean_default(cls, default_value):
+        return default_value
 
-class Digit(DataType):
+
+class _DigitType(DataType):
     @classmethod
     def value2db_str(cls, value):
         if value is None:
@@ -55,28 +59,28 @@ class Digit(DataType):
         return str(value)
 
 
-class Int64(Digit):
+class Int64(_DigitType):
     python_data_type = int
     is_data_type_for_auto_convert = True
 
 
-class Int32(Digit):
+class Int32(_DigitType):
     python_data_type = int
 
 
-class Int16(Digit):
+class Int16(_DigitType):
     python_data_type = int
 
 
-class Int8(Digit):
+class Int8(_DigitType):
     python_data_type = int
 
 
-class Float(Digit):
+class Float(_DigitType):
     python_data_type = float
 
 
-class Double(Digit):
+class Double(_DigitType):
     python_data_type = float
     is_data_type_for_auto_convert = True
 
@@ -125,7 +129,7 @@ class Bool(DataType):
         if value is None:
             return 'NULL'
         return 'true' if value else 'false'
-
+    
 
 class Date(DataType):
     nebula_ttype = ttypes.Date
@@ -160,6 +164,12 @@ class Time(DataType):
     is_data_type_for_auto_convert = True
 
     @classmethod
+    def clean_default(cls, default_value):
+        if isinstance(default_value, time) and not default_value.tzinfo:
+            return default_value.replace(tzinfo=pytz.timezone(database_settings.timezone_name))
+        return default_value
+
+    @classmethod
     def ttype2python_type(cls, value: ttypes.Time | str):
         if value is None:
             return
@@ -187,6 +197,12 @@ class Datetime(DataType):
     auto = ''
     python_data_type = datetime
     is_data_type_for_auto_convert = True
+
+    @classmethod
+    def clean_default(cls, default_value):
+        if isinstance(default_value, datetime) and not default_value.tzinfo:
+            return default_value.replace(tzinfo=pytz.timezone(database_settings.timezone_name))
+        return default_value
 
     @classmethod
     def ttype2python_type(cls, value: ttypes.DateTime | str):

@@ -14,7 +14,7 @@ class SchemaField(Statement):
         self.prop_name = prop_name
         self.data_type = data_type
         self.nullable = nullable
-        self.default = default
+        self.default = self.data_type.clean_default(default)
         self.comment = comment
 
     def __str__(self):
