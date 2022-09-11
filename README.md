@@ -1,5 +1,7 @@
 # nebula-carina
 
+Nebula Carina is a **Pydantic** based **Fastapi** friendly **ORM** framework for graph database **Nebula Graph**.
+
 This project is designed to provide an easy-to-use orm package for the Nebula Graph database for Python development, especially web application development.
 
 Nebula Graph is a powerful graph database, the only graph database solution in the world that can accommodate hundreds of billions of vertices and trillions of edges and provide millisecond-level query latency.
