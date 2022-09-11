@@ -229,14 +229,14 @@ async def get_admirers(character_id: str):
     return VirtualCharacter.objects.find_sources(character_id, Love, distinct=True)
 
 
-@app.get("/your-complex-relation")
-async def what_a_complex_human_relation():
+@app.get("/character/{character_id}/your-complex-relation")
+async def what_a_complex_human_relation(character_id: str):
     return ModelBuilder.match(
         '(v)-[e:love]->(v2)-[e2:love]->(v3)', {
             'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter,
             'e2': EdgeModel, 'v3': VirtualCharacter
         },
-        condition=Q(v__id="char_test1"),
+        condition=Q(v__id=character_id),
     )
 ```
 
