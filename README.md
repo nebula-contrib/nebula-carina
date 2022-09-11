@@ -134,6 +134,11 @@ migrate(make_migrations())
 
 ### Data Model Method
 ```python
+from example.models import VirtualCharacter, Figure, Source, LimitedCharacter, Love, Support
+from nebula_model.models.models import EdgeModel, Limit
+from datetime import datetime
+
+
 # create/update vertex
 VirtualCharacter(
     vid='char_test1', figure=Figure(
@@ -163,6 +168,9 @@ EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Suppo
 # get vertex by id
 character1 = VirtualCharacter.objects.get('char_test1')
 character2 = VirtualCharacter.objects.get('char_test2')
+
+# find the exact edge by src_vid, dst_vid and edge type
+edge1 = EdgeModel.objects.get('char_test1', 'char_test2', Love)
 
 # find all edges between vertexes
 EdgeModel.objects.find_between('char_test1', 'char_test2', limit=Limit(10))
@@ -244,7 +252,7 @@ async def what_a_complex_human_relation(character_id: str):
 - [ ] Indexes
 - [ ] TTL on schema
 - [ ] Go / Fetch / Lookup statements
-- [x] Session Pool (partially, might implement a better one later base on nebula-python)
+- [x] Session / Connection Pool (partially, might implement a better one later base on nebula-python)
 - [ ] More abstractions on different scenarios
 - [ ] Default values for schema models
 - [ ] Generic Vertex Model
