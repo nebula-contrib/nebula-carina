@@ -16,6 +16,7 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
+    return make_migrations()
     # run_ngql('SHOW SPACES;')
     # print(show_spaces())
     # print(use_space('main'))
@@ -105,18 +106,18 @@ async def root():
     # ).save()
     # EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Love(way='gun', times=40)).save()
     # return EdgeModel.objects.find_between('char_test1', 'char_test2')
-    character1 = VirtualCharacter.objects.get('char_test1')
-    LocalSession().session.release()
-    character2 = VirtualCharacter.objects.get('char_test2')
-    character1.get_out_edges(Love)
-    character2.get_reverse_edges(Love)
-    character1.get_out_edge_and_destinations(Love, VirtualCharacter)
-    character2.get_reverse_edge_and_sources(Love, VirtualCharacter)
+    # character1 = VirtualCharacter.objects.get('char_test1')
+    # LocalSession().session.release()
+    # character2 = VirtualCharacter.objects.get('char_test2')
+    # character1.get_out_edges(Love)
+    # character2.get_reverse_edges(Love)
+    # character1.get_out_edge_and_destinations(Love, VirtualCharacter)
+    # character2.get_reverse_edge_and_sources(Love, VirtualCharacter)
     # return VirtualCharacter.objects.find_destinations('char_test1', Love)
     # return VirtualCharacter.objects.find_sources('char_test2', Love, distinct=False, limit=Limit(1))
     # return character2.get_sources(Love, VirtualCharacter)
     # return character1.get_destinations(Love, VirtualCharacter)
-    return character1
+    # return character1
     # return rst
     # return ModelBuilder.match(
     #     '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},

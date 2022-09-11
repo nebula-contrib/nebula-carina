@@ -87,7 +87,13 @@ class LocalSession(object):
             else:
                 raise
         if result.error_code() < 0:
-            raise NGqlError(result.error_msg(), result.error_code(), ngql)
+            if 'Session not existed!' in result.error_msg():
+                self.recover_session()
+                result = self.session.execute(ngql)
+                if result.error_code() < 0:
+                    raise NGqlError(result.error_msg(), result.error_code(), ngql)
+            else:
+                raise NGqlError(result.error_msg(), result.error_code(), ngql)
         return result
 
 

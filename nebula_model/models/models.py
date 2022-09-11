@@ -92,7 +92,7 @@ class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
 
     @classmethod
     def alter_schema_ngql(cls):
-        # TODO ttl
+        # TODO ttl where to get the ttl info?
         from_dict = {db_field.prop_name: db_field for db_field in describe_schema(cls.get_schema_type(), cls.db_name())}
         to_dict = {db_field.prop_name: db_field for db_field in cls._create_db_fields()}
         adds, drop_names, changes = [], [], []
@@ -112,7 +112,10 @@ class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
                 alter_definitions.append(Alter(AlterType.CHANGE, properties=changes))
             if drop_names:
                 alter_definitions.append(Alter(AlterType.DROP, prop_names=drop_names))
-            return alter_schema_ngql(cls.get_schema_type(), cls.db_name(), alter_definitions=alter_definitions)
+            return alter_schema_ngql(
+                cls.get_schema_type(), cls.db_name(),
+                alter_definitions=alter_definitions,
+            )
         return None
 
 
