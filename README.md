@@ -195,14 +195,49 @@ character2.get_reverse_edge_and_sources(Love, VirtualCharacter)
 from nebula_model.ngql.query.conditions import Q
 from nebula_model.models.model_builder import ModelBuilder
 from nebula_model.ngql.query.match import Limit
+from nebula_model.models.models import EdgeModel
 
 
 ModelBuilder.match('(v)', {'v': VirtualCharacter}, limit=Limit(10))
 
 ModelBuilder.match(
-    '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
-    condition=Q(v__id__in=[112, 113]),
+    '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter},
+    condition=Q(v__id__in=["char_test1", "char_test3"]),
 )
+```
+
+### Fastapi
+If you are using fastapi, then serialization and deserialization are already handled by the repo. For example, in your api functions, you are welcomed to use the result of data model or the model builder in your return function. It's very easy to use!
+```python
+from fastapi import FastAPI
+from example.models import VirtualCharacter, Love
+from nebula_model.models.model_builder import ModelBuilder
+from nebula_model.models.models import EdgeModel
+from nebula_model.ngql.query.conditions import Q
+
+
+app = FastAPI()
+
+
+@app.get("/character/{character_id}")
+async def get_character(character_id: str):
+    return VirtualCharacter.objects.get(character_id)
+
+
+@app.get("/character/{character_id}/admirers")
+async def get_admirers(character_id: str):
+    return VirtualCharacter.objects.find_sources(character_id, Love, distinct=True)
+
+
+@app.get("/your-complex-relation")
+async def what_a_complex_human_relation():
+    return ModelBuilder.match(
+        '(v)-[e:love]->(v2)-[e2:love]->(v3)', {
+            'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter,
+            'e2': EdgeModel, 'v3': VirtualCharacter
+        },
+        condition=Q(v__id="char_test1"),
+    )
 ```
 
 ## TODO List

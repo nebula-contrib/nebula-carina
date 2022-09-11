@@ -16,7 +16,13 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return make_migrations()
+    return ModelBuilder.match(
+        '(v)-[e:love]->(v2)-[e2:love]->(v3)', {
+            'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter,
+            'e2': EdgeModel, 'v3': VirtualCharacter
+        },
+        condition=Q(v__id="char_test1"),
+    )
     # run_ngql('SHOW SPACES;')
     # print(show_spaces())
     # print(use_space('main'))
@@ -75,12 +81,12 @@ async def root():
     # print(insert_edge)
     # run_ngql(insert_edge)
     # list(ModelBuilder.match('(v:figure{name: "trytest4"})', {'v': VirtualCharacter}, limit=Limit(50)))
-    # k = KillEdge(src_vid=112, dst_vid=113, ranking=0, love=Love(way='gun', times=20))
+    # k = EdgeModel(src_vid=112, dst_vid=113, ranking=0, love=Love(way='gun', times=20))
     # k.save()
-    # list(ModelBuilder.match('() -[e]-> ()', {'e': KillEdge}, limit=Limit(50)))
+    # list(ModelBuilder.match('() -[e]-> ()', {'e': EdgeModel}, limit=Limit(50)))
     # print(list(ModelBuilder.match('(v)', {'v': VirtualCharacter}, limit=Limit(10))))
     # ModelBuilder.match(
-    #     '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
+    #     '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter},
     #     condition=(Q(v__id=112) | Q(v__id=113)),
     # )
     # v
@@ -120,6 +126,6 @@ async def root():
     # return character1
     # return rst
     # return ModelBuilder.match(
-    #     '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': KillEdge, 'v2': VirtualCharacter},
+    #     '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter},
     #     condition=Q(v__id__in=[112, 113]),
     # )
