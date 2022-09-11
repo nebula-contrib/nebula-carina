@@ -1,7 +1,7 @@
 from enum import Enum
 
-from nebula_model.ngql.schema import data_types
-from nebula_model.ngql.statements.core import Statement
+from nebula_carina.ngql.schema import data_types
+from nebula_carina.ngql.statements.core import Statement
 
 
 class SchemaField(Statement):

@@ -1,4 +1,4 @@
-from nebula_model.ngql.statements.core import Statement
+from nebula_carina.ngql.statements.core import Statement
 
 
 class OrderBy(Statement):

@@ -14,7 +14,7 @@ setup(
     license='MIT Licence',
     description='Nebula Database Modeling powered by Pydantic and Nebula Python.',
     packages=find_packages(),
-    package_dir={'nebula_model': 'nebula_model'},
+    package_dir={'nebula_carina': 'nebula_carina'},
     python_requires='>=3.10',
     install_requires=['nebula3-python', 'pydantic'],
 )

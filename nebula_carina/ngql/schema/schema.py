@@ -1,9 +1,9 @@
 from typing import Optional
 
-from nebula_model.ngql.connection.connection import run_ngql
-from nebula_model.ngql.schema.data_types import string_to_data_type
-from nebula_model.ngql.statements.schema import Alter, Ttl, SchemaType, SchemaField
-from nebula_model.utils.utils import read_str
+from nebula_carina.ngql.connection.connection import run_ngql
+from nebula_carina.ngql.schema.data_types import string_to_data_type
+from nebula_carina.ngql.statements.schema import Alter, Ttl, SchemaType, SchemaField
+from nebula_carina.utils.utils import read_str
 
 
 def show_schemas(schema: SchemaType) -> list[str]:

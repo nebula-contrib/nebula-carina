@@ -1,8 +1,8 @@
 from nebula3.data.ResultSet import ResultSet
 
-from nebula_model.ngql.connection.connection import run_ngql
-from nebula_model.ngql.query.conditions import Condition
-from nebula_model.ngql.statements.clauses import OrderBy, Limit
+from nebula_carina.ngql.connection.connection import run_ngql
+from nebula_carina.ngql.query.conditions import Condition
+from nebula_carina.ngql.statements.clauses import OrderBy, Limit
 
 
 def match(

@@ -3,14 +3,14 @@ from datetime import datetime
 from fastapi import FastAPI
 
 from example.models import VirtualCharacter, Love, Figure, Source, Support, LimitedCharacter
-from nebula_model.models.migrations import make_migrations, migrate
-from nebula_model.models.model_builder import ModelBuilder
-from nebula_model.models.models import EdgeModel
-from nebula_model.ngql.connection.connection import run_ngql, LocalSession
-from nebula_model.ngql.query.conditions import RawCondition, Q
-from nebula_model.ngql.query.match import Limit
-from nebula_model.ngql.record.edge import insert_edge_ngql
-from nebula_model.ngql.statements.edge import EdgeValue
+from nebula_carina.models.migrations import make_migrations, migrate
+from nebula_carina.models.model_builder import ModelBuilder
+from nebula_carina.models.models import EdgeModel
+from nebula_carina.ngql.connection.connection import run_ngql, LocalSession
+from nebula_carina.ngql.query.conditions import RawCondition, Q
+from nebula_carina.ngql.query.match import Limit
+from nebula_carina.ngql.record.edge import insert_edge_ngql
+from nebula_carina.ngql.statements.edge import EdgeValue
 
 app = FastAPI()
 

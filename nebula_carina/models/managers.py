@@ -1,14 +1,14 @@
 from abc import ABC
 
-from nebula_model.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError
-from nebula_model.ngql.connection.connection import run_ngql
-from nebula_model.ngql.query.conditions import RawCondition
-from nebula_model.ngql.query.match import Limit
-from nebula_model.models.model_builder import ModelBuilder
-from nebula_model.ngql.record.edge import delete_edge_ngql
-from nebula_model.ngql.record.vertex import delete_vertex_ngql
-from nebula_model.ngql.statements.edge import EdgeDefinition
-from nebula_model.utils.utils import vid2str
+from nebula_carina.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError
+from nebula_carina.ngql.connection.connection import run_ngql
+from nebula_carina.ngql.query.conditions import RawCondition
+from nebula_carina.ngql.query.match import Limit
+from nebula_carina.models.model_builder import ModelBuilder
+from nebula_carina.ngql.record.edge import delete_edge_ngql
+from nebula_carina.ngql.record.vertex import delete_vertex_ngql
+from nebula_carina.ngql.statements.edge import EdgeDefinition
+from nebula_carina.utils.utils import vid2str
 
 
 class Manager(ABC):
@@ -41,7 +41,7 @@ class BaseVertexManager(Manager):
             distinct=False, limit: Limit = None
     ):
         if edge_type is None:
-            from nebula_model.models.models import EdgeTypeModel
+            from nebula_carina.models.models import EdgeTypeModel
             edge_type = EdgeTypeModel
         return [
             r['v1'] for r in ModelBuilder.match(
@@ -60,7 +60,7 @@ class BaseVertexManager(Manager):
             distinct=False, limit: Limit = None
     ):
         if edge_type is None:
-            from nebula_model.models.models import EdgeTypeModel
+            from nebula_carina.models.models import EdgeTypeModel
             edge_type = EdgeTypeModel
         return [
             r['v2'] for r in ModelBuilder.match(
@@ -82,7 +82,7 @@ class BaseEdgeManager(Manager):
             limit: Limit = None
     ):
         if edge_type is None:
-            from nebula_model.models.models import EdgeTypeModel
+            from nebula_carina.models.models import EdgeTypeModel
             edge_type = EdgeTypeModel
         return [
             r['e'] for r in ModelBuilder.match(
@@ -95,7 +95,7 @@ class BaseEdgeManager(Manager):
 
     def find_by_source(self, src_vid: str, edge_type=None, *, limit: Limit = None):
         if edge_type is None:
-            from nebula_model.models.models import EdgeTypeModel
+            from nebula_carina.models.models import EdgeTypeModel
             edge_type = EdgeTypeModel
         return [
             r['e'] for r in ModelBuilder.match(
@@ -108,7 +108,7 @@ class BaseEdgeManager(Manager):
 
     def find_by_destination(self, dst_vid: str, edge_type, *, limit: Limit = None):
         if edge_type is None:
-            from nebula_model.models.models import EdgeTypeModel
+            from nebula_carina.models.models import EdgeTypeModel
             edge_type = EdgeTypeModel
         return [
             r['e'] for r in ModelBuilder.match(

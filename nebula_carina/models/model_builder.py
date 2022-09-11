@@ -1,7 +1,7 @@
 from typing import Iterable, Type
-from nebula_model.models.abstract import NebulaAdaptor
-from nebula_model.ngql.query.conditions import Condition
-from nebula_model.ngql.query.match import match, OrderBy, Limit
+from nebula_carina.models.abstract import NebulaAdaptor
+from nebula_carina.ngql.query.conditions import Condition
+from nebula_carina.ngql.query.match import match, OrderBy, Limit
 
 
 class ModelBuilder(object):

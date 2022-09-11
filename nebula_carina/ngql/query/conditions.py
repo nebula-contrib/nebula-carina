@@ -1,6 +1,6 @@
 from enum import Enum
 
-from nebula_model.ngql.schema.data_types import auto_convert_value_to_db_str
+from nebula_carina.ngql.schema.data_types import auto_convert_value_to_db_str
 
 
 class Condition(object):

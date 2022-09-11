@@ -1,13 +1,13 @@
 import time
 import unittest
 
-from nebula_model.ngql.connection.connection import run_ngql
-from nebula_model.ngql.errors import NGqlError
-from nebula_model.ngql.schema.data_types import FixedString
-from nebula_model.ngql.schema.schema import create_schema_ngql, describe_tag
-from nebula_model.ngql.schema.space import show_spaces, create_space, VidTypeEnum, drop_space, use_space, \
+from nebula_carina.ngql.connection.connection import run_ngql
+from nebula_carina.ngql.errors import NGqlError
+from nebula_carina.ngql.schema.data_types import FixedString
+from nebula_carina.ngql.schema.schema import create_schema_ngql, describe_tag
+from nebula_carina.ngql.schema.space import show_spaces, create_space, VidTypeEnum, drop_space, use_space, \
     describe_space, make_vid_desc_string, clear_space
-from nebula_model.ngql.statements.schema import SchemaType, SchemaField
+from nebula_carina.ngql.statements.schema import SchemaType, SchemaField
 
 
 class TestSpace(unittest.TestCase):

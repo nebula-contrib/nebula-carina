@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Optional
 
-from nebula_model.models import models
-from nebula_model.models.fields import create_nebula_field as _
-from nebula_model.ngql.schema import data_types
+from nebula_carina.models import models
+from nebula_carina.models.fields import create_nebula_field as _
+from nebula_carina.ngql.schema import data_types
 
 
 class Figure(models.TagModel):

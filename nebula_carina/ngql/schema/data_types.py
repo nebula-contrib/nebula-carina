@@ -3,9 +3,9 @@ from datetime import datetime, date, time
 
 import pytz
 
-from nebula_model.utils.utils import pascal_case_to_snake_case, read_str
+from nebula_carina.utils.utils import pascal_case_to_snake_case, read_str
 from nebula3.common import ttypes
-from nebula_model.settings import database_settings
+from nebula_carina.settings import database_settings
 
 data_type_factory = {}
 ttype2data_type = {}

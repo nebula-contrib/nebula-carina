@@ -1,12 +1,12 @@
 import datetime
 
-from nebula_model.ngql.connection.connection import run_ngql
-from nebula_model.ngql.errors import NGqlError
-from nebula_model.ngql.schema import data_types
-from nebula_model.ngql.schema.schema import create_tag_ngql, describe_tag, show_tags, alter_tag_ngql, drop_tag_ngql, \
+from nebula_carina.ngql.connection.connection import run_ngql
+from nebula_carina.ngql.errors import NGqlError
+from nebula_carina.ngql.schema import data_types
+from nebula_carina.ngql.schema.schema import create_tag_ngql, describe_tag, show_tags, alter_tag_ngql, drop_tag_ngql, \
     alter_edge_ngql, describe_edge, drop_edge_ngql, show_edges, create_edge_ngql
-from nebula_model.ngql.schema.space import use_space
-from nebula_model.ngql.statements.schema import SchemaField, Ttl, Alter, AlterType
+from nebula_carina.ngql.schema.space import use_space
+from nebula_carina.ngql.statements.schema import SchemaField, Ttl, Alter, AlterType
 from tests.base import TestWithNewSpace
 
 

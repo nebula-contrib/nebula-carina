@@ -2,7 +2,7 @@ import string
 import time
 import unittest
 import random
-from nebula_model.ngql.schema.space import show_spaces, create_space, VidTypeEnum, drop_space, use_space
+from nebula_carina.ngql.schema.space import show_spaces, create_space, VidTypeEnum, drop_space, use_space
 
 
 class TestWithNewSpace(unittest.TestCase):

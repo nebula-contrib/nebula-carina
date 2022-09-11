@@ -4,17 +4,17 @@ from collections import OrderedDict
 
 import pytz
 
-from nebula_model.ngql.connection.connection import run_ngql
-from nebula_model.ngql.query.conditions import RawCondition
-from nebula_model.ngql.query.match import match
-from nebula_model.ngql.record.vertex import insert_vertex_ngql, update_vertex_ngql
-from nebula_model.ngql.schema import data_types
-from nebula_model.ngql.schema.schema import create_tag_ngql
-from nebula_model.ngql.schema.space import use_space
-from nebula_model.ngql.statements.clauses import Limit
-from nebula_model.ngql.statements.schema import SchemaField, Ttl
-from nebula_model.settings import database_settings
-from nebula_model.utils.utils import read_str
+from nebula_carina.ngql.connection.connection import run_ngql
+from nebula_carina.ngql.query.conditions import RawCondition
+from nebula_carina.ngql.query.match import match
+from nebula_carina.ngql.record.vertex import insert_vertex_ngql, update_vertex_ngql
+from nebula_carina.ngql.schema import data_types
+from nebula_carina.ngql.schema.schema import create_tag_ngql
+from nebula_carina.ngql.schema.space import use_space
+from nebula_carina.ngql.statements.clauses import Limit
+from nebula_carina.ngql.statements.schema import SchemaField, Ttl
+from nebula_carina.settings import database_settings
+from nebula_carina.utils.utils import read_str
 from tests.base import TestWithNewSpace
 
 

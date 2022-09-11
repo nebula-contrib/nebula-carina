@@ -5,8 +5,8 @@ from nebula3.data import ResultSet
 from nebula3.gclient.net import ConnectionPool
 from nebula3.Config import Config
 
-from nebula_model.ngql.errors import NGqlError, DefaultSpaceNotExistError
-from nebula_model.settings import database_settings
+from nebula_carina.ngql.errors import NGqlError, DefaultSpaceNotExistError
+from nebula_carina.settings import database_settings
 
 
 # TODO: fix connection / connection pool / session in a robust way later
@@ -104,7 +104,7 @@ def run_ngql(
     return LocalSession().run_ngql(ngql, is_spacial_operation=is_spacial_operation)
 
 
-from nebula_model.ngql.schema.space import create_space, show_spaces  # noqa
+from nebula_carina.ngql.schema.space import create_space, show_spaces  # noqa
 if database_settings.auto_create_default_space_with_vid_desc and database_settings.default_space not in show_spaces():
     create_space(
         database_settings.default_space,

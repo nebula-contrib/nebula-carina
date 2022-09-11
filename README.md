@@ -30,7 +30,7 @@ nebula_servers='["192.168.1.10:9669"]'
 nebula_user_name=root
 nebula_password=1234
 nebula_max_connection_pool_size=10
-nebula_model_paths='["example.models"]'
+nebula_carina_paths='["example.models"]'
 nebula_default_space=main
 nebula_auto_create_default_space_with_vid_desc=FIXED_STRING(20)
 nebula_timezone_name=UTC
@@ -38,13 +38,13 @@ nebula_timezone_name=UTC
 
 You can export by:
 ```
-export nebula_model_paths='["example.models"]' nebula_password=1234 nebula_servers='["192.168.1.10:9669"]' nebula_user_name=root nebula_default_space=main nebula_auto_create_default_space_with_vid_desc=FIXED_STRING(20)
+export nebula_carina_paths='["example.models"]' nebula_password=1234 nebula_servers='["192.168.1.10:9669"]' nebula_user_name=root nebula_default_space=main nebula_auto_create_default_space_with_vid_desc=FIXED_STRING(20)
 ```
 
 ## Example
 Ensure that the default space exists. You can create a default space by creating a script:
 ```python
-from nebula_model.ngql.schema.space import create_space, show_spaces, VidTypeEnum
+from nebula_carina.ngql.schema.space import create_space, show_spaces, VidTypeEnum
 
 main_space_name = "main"
 
@@ -54,7 +54,7 @@ if main_space_name not in show_spaces():
 Or you can just set `nebula_auto_create_default_space_with_vid_desc=FIXED_STRING(20)` so that it will be automatically handled.
 
 ### Define Models
-Then, develop models defined in nebula_model_paths.
+Then, develop models defined in nebula_carina_paths.
 
 #### Schema Models
 * An TagModel is used to define a nebula tag.
@@ -64,9 +64,9 @@ For example:
 ```python
 from datetime import datetime
 
-from nebula_model.models import models
-from nebula_model.models.fields import create_nebula_field as _
-from nebula_model.ngql.schema import data_types
+from nebula_carina.models import models
+from nebula_carina.models.fields import create_nebula_field as _
+from nebula_carina.ngql.schema import data_types
 
 
 class Figure(models.TagModel):
@@ -105,7 +105,7 @@ class Support(models.EdgeTypeModel):
 * An VertexModel is used to define a nebula vertex. It does nothing to the schema.
 
 ```python
-from nebula_model.models import models
+from nebula_carina.models import models
 
 
 class VirtualCharacter(models.VertexModel):
@@ -123,7 +123,7 @@ class LimitedCharacter(models.VertexModel):
 use `make_migrations` and `migrate` to synchronize the schema to current space.
 
 ```python
-from nebula_model.models.migrations import make_migrations, migrate
+from nebula_carina.models.migrations import make_migrations, migrate
 
 make_migrations()
 
@@ -135,7 +135,7 @@ migrate(make_migrations())
 ### Data Model Method
 ```python
 from example.models import VirtualCharacter, Figure, Source, LimitedCharacter, Love, Support
-from nebula_model.models.models import EdgeModel, Limit
+from nebula_carina.models.models import EdgeModel, Limit
 from datetime import datetime
 
 
@@ -200,10 +200,10 @@ character2.get_reverse_edge_and_sources(Love, VirtualCharacter)
 ### Model Builder
 * A easy model builder ready for you to build any ngql
 ```python
-from nebula_model.ngql.query.conditions import Q
-from nebula_model.models.model_builder import ModelBuilder
-from nebula_model.ngql.query.match import Limit
-from nebula_model.models.models import EdgeModel
+from nebula_carina.ngql.query.conditions import Q
+from nebula_carina.models.model_builder import ModelBuilder
+from nebula_carina.ngql.query.match import Limit
+from nebula_carina.models.models import EdgeModel
 
 
 ModelBuilder.match('(v)', {'v': VirtualCharacter}, limit=Limit(10))
@@ -219,9 +219,9 @@ If you are using fastapi, then serialization and deserialization are already han
 ```python
 from fastapi import FastAPI
 from example.models import VirtualCharacter, Love
-from nebula_model.models.model_builder import ModelBuilder
-from nebula_model.models.models import EdgeModel
-from nebula_model.ngql.query.conditions import Q
+from nebula_carina.models.model_builder import ModelBuilder
+from nebula_carina.models.models import EdgeModel
+from nebula_carina.ngql.query.conditions import Q
 
 
 app = FastAPI()

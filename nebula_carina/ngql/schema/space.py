@@ -1,6 +1,6 @@
-from nebula_model.ngql.connection.connection import run_ngql, LocalSession
+from nebula_carina.ngql.connection.connection import run_ngql, LocalSession
 from enum import Enum
-from nebula_model.utils.utils import read_str
+from nebula_carina.utils.utils import read_str
 
 
 class VidTypeEnum(Enum):
