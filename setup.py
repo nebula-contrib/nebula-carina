@@ -6,11 +6,11 @@ long_description = (base_dir / 'README.md').read_text()
 
 
 setup(
-    name='nebula-model',
+    name='nebula-carina',
     version='0.2.0',
     author='Sword Elucidator',
     author_email='nagisa940216@gmail.com',
-    url='https://github.com/SwordElucidator/nebula-model',
+    url='https://github.com/SwordElucidator/nebula-carina',
     license='MIT Licence',
     description='Nebula Database Modeling powered by Pydantic and Nebula Python.',
     packages=find_packages(),

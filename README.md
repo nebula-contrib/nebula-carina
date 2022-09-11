@@ -1,4 +1,4 @@
-# nebula-model
+# nebula-carina
 
 This project is designed to provide an easy-to-use orm package for the Nebula Graph database for Python development, especially web application development.
 
@@ -20,7 +20,7 @@ If you have any ideas for improving this project, you are very welcome to contac
 
 install using `pip`
 
-    pip install nebula-model
+    pip install nebula-carina
 
 ## Configuration
 
