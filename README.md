@@ -256,3 +256,4 @@ async def what_a_complex_human_relation(character_id: str):
 - [ ] More abstractions on different scenarios
 - [ ] Default values for schema models
 - [ ] Generic Vertex Model
+- [ ] Django Support
