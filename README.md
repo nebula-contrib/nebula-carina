@@ -305,5 +305,6 @@ Flask usage is quite similar to the Django usage. Basically use `.dict()` functi
 - [ ] More abstractions on different scenarios
 - [ ] Default values for schema models
 - [ ] Generic Vertex Model
-- [x] Django Support
-- [ ] Match Result Wrapper
+- [x] Basic Django Support
+  - [ ] Django management.py
+  - [ ] Match Result Wrapper
