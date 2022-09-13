@@ -4,7 +4,7 @@ try:
 
 
     class NebulaCarinaConfig(AppConfig):
-        name = "nebula_contrib.nebula_carina"
+        name = "nebula_carina"
         label = "nebula_carina"
 
         verbose_name = _("Nebula Carina")

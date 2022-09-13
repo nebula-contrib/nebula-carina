@@ -1,12 +1,12 @@
 # nebula-carina
 
-Nebula Carina is a **Pydantic** based **Fastapi** friendly **ORM** framework for graph database **Nebula Graph**.
+Nebula Carina is a **Pydantic** based **ORM** framework for graph database **Nebula Graph**.
 
 This project is designed to provide an easy-to-use orm package for the Nebula Graph database for Python development, especially web application development.
 
 Nebula Graph is a powerful graph database, the only graph database solution in the world that can accommodate hundreds of billions of vertices and trillions of edges and provide millisecond-level query latency.
 
-The goals of this project include providing an object-oriented description of the database structure, concise Query statements, and JSONizable results. In particular, I used the pydantic library with the expectation that this library can be used in conjunction with the fastapi framework.
+The goals of this project include providing an object-oriented description of the database structure, concise Query statements, and JSONizable results. In particular, I used the pydantic library with the expectation that this library can be used in conjunction with any modern python web framework.
 
 This project is based on the official package nebula-python https://github.com/vesoft-inc/nebula-python.
 
@@ -26,7 +26,35 @@ install using `pip`
 
 ## Configuration
 
-Please configure environment variables.
+### By Django Settings
+
+If you are using Django framework, then add `nebula_carina` to `INSTALLED_APPS`:
+```python
+INSTALLED_APPS = [
+    ...
+    'nebula_carina',
+    ...
+]
+```
+
+Then, setup the `CARINA_SETTINGS` in your **settings.py** file as following:
+```python
+CARINA_SETTINGS = {
+    "auto_create_default_space_with_vid_desc": "FIXED_STRING(20)",
+    "default_space": "main",
+    "max_connection_pool_size": 10,
+    "model_paths": ["nebula.carina"],
+    "user_name": "root",
+    "password": "1234",
+    "servers": ["192.168.31.248:9669"],
+    "timezone_name": "UTC",
+}
+```
+
+
+### By Environment Variables
+
+Please configure environment variables if you are not using Django.
 ```
 nebula_servers='["192.168.1.10:9669"]'
 nebula_user_name=root
@@ -216,7 +244,8 @@ ModelBuilder.match(
 )
 ```
 
-### Fastapi
+### Framework Specific Examples
+#### Fastapi
 If you are using fastapi, then serialization and deserialization are already handled by the repo. For example, in your api functions, you are welcomed to use the result of data model or the model builder in your return function. It's very easy to use!
 ```python
 from fastapi import FastAPI
@@ -250,6 +279,24 @@ async def what_a_complex_human_relation(character_id: str):
     )
 ```
 
+#### Django
+Basically things are the same as in fastapi except that you have to use `.dict()` method to serialize a model before using it in response.
+Match method would be harder to use. A wrapper that support `.dict()` method will be implemented in 0.3.0.
+```python
+from example.models import VirtualCharacter
+from django.http import JsonResponse
+
+def some_view(request, character_id: str):
+    vr = VirtualCharacter.objects.get(character_id)
+    # make sure that use .dict() function to serialize the result
+    return JsonResponse(vr.dict())
+
+```
+
+#### Flask
+Flask usage is quite similar to the Django usage. Basically use `.dict()` function to serialize the model.
+
+
 ## TODO List
 - [ ] Indexes
 - [ ] TTL on schema
@@ -258,4 +305,5 @@ async def what_a_complex_human_relation(character_id: str):
 - [ ] More abstractions on different scenarios
 - [ ] Default values for schema models
 - [ ] Generic Vertex Model
-- [ ] Django Support
+- [x] Django Support
+- [ ] Match Result Wrapper
