@@ -10,7 +10,7 @@ The goals of this project include providing an object-oriented description of th
 
 This project is based on the official package nebula-python https://github.com/vesoft-inc/nebula-python.
 
-At present, the project has just started and is not stable yet, the code changes rapidly and the method is unstable.
+At present, the project is not stable yet, the code changes rapidly and the methods are unstable.
 If you have any ideas for improving this project, you are very welcome to contact me via issue or email.
 
 ## Requirements
@@ -150,7 +150,8 @@ class LimitedCharacter(models.VertexModel):
 * An EdgeModel is used to define a nebula edge. But note that there will be no subclasses for edge model since we don't need it.
 
 ### Migrations
-use `make_migrations` and `migrate` to synchronize the schema to current space.
+Use `make_migrations` and `migrate` to synchronize the schema to current space.
+Please note that only final consistency on DB schema is currently supported.
 
 ```python
 from nebula_carina.models.migrations import make_migrations, migrate
@@ -160,6 +161,12 @@ make_migrations()
 # you can print out the result and check it
 # then, run migrate
 migrate(make_migrations())
+```
+
+#### Django
+If you are using Django, you can do the migration by the following command:
+```
+python manage.py nebulamigrate
 ```
 
 ### Data Model Method

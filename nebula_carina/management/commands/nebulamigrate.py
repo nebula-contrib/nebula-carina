@@ -8,6 +8,9 @@ try:
 
         def handle(self, *args, **options):
             migrations = make_migrations()
+            if not migrations:
+                self.stdout.write('No Nebula Graph schema change found')
+                return
             self.stdout.write('The following migration NGQLs will be executed: \n\n%s' % ('\n'.join(migrations)))
             if input("Type 'yes' to continue, or 'no' to cancel\n") == 'yes':
                 migrate(make_migrations())
