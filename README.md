@@ -309,7 +309,7 @@ def what_a_complex_human_relation(request, character_id: str):
             'e2': EdgeModel, 'v3': VirtualCharacter
         },
         condition=Q(v__id=character_id),
-    ))
+    ), safe=False)
 
 
 # same method as the previous one if you would like to access the models
@@ -322,7 +322,7 @@ def what_a_complex_human_relation_another(request, character_id: str):
         },
         condition=Q(v__id=character_id),
       )
-    ])
+    ], safe=False)
 ```
 
 #### Flask
