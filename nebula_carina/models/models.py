@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
 
-from nebula_carina.models.abstract import NebulaAdaptor
+from nebula_carina.models.abstract import NebulaConvertableProtocol
 from nebula_carina.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError, DuplicateEdgeTypeNameError
 from nebula_carina.models.fields import NebulaFieldInfo
 from nebula_carina.models.managers import Manager, BaseVertexManager, BaseEdgeManager
@@ -176,7 +176,7 @@ class NebulaRecordModelMetaClass(ModelMetaclass):
                     val.register(cls)
 
 
-class NebulaRecordModel(BaseModel, NebulaAdaptor, metaclass=NebulaRecordModelMetaClass):
+class NebulaRecordModel(BaseModel, NebulaConvertableProtocol, metaclass=NebulaRecordModelMetaClass):
     objects = BaseVertexManager()
 
 
@@ -272,7 +272,7 @@ class VertexModel(NebulaRecordModel):
         return EdgeModel.objects.find_by_source(self.vid, edge_type, limit=limit)
 
     def get_out_edge_and_destinations(self, edge_type, dst_vertex_model, *, limit: Limit = None) \
-            -> Iterable[dict[str, NebulaAdaptor]]:
+            -> Iterable[dict[str, NebulaConvertableProtocol]]:
         if edge_type is None:
             edge_type = EdgeTypeModel
         return (
@@ -290,7 +290,7 @@ class VertexModel(NebulaRecordModel):
         return EdgeModel.objects.find_by_destination(self.vid, edge_type, limit=limit)
 
     def get_reverse_edge_and_sources(self, edge_type, src_vertex_model, *, limit: Limit = None) \
-            -> Iterable[dict[str, NebulaAdaptor]]:
+            -> Iterable[dict[str, NebulaConvertableProtocol]]:
         if edge_type is None:
             edge_type = EdgeTypeModel
         return (
