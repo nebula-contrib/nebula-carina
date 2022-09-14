@@ -123,7 +123,7 @@ class BaseEdgeManager(Manager):
         try:
             return self.find_between(src_vid, dst_vid, edge_type)[0]
         except IndexError:
-            raise EdgeDoesNotExistError
+            raise EdgeDoesNotExistError(src_vid, dst_vid)
 
     def delete(self, edge_definitions: list[EdgeDefinition]):
         return run_ngql(delete_edge_ngql(self.model.get_edge_type_and_model()[1].db_name(), edge_definitions))

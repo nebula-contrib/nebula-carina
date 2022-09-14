@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from nebula_carina.models import models
 from nebula_carina.models.fields import create_nebula_field as _

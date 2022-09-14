@@ -10,7 +10,7 @@ The goals of this project include providing an object-oriented description of th
 
 This project is based on the official package nebula-python https://github.com/vesoft-inc/nebula-python.
 
-At present, the project has just started and is not stable yet, the code changes rapidly and the method is unstable.
+At present, the project is not stable yet, the code changes rapidly and the methods are unstable.
 If you have any ideas for improving this project, you are very welcome to contact me via issue or email.
 
 ## Requirements
@@ -150,7 +150,8 @@ class LimitedCharacter(models.VertexModel):
 * An EdgeModel is used to define a nebula edge. But note that there will be no subclasses for edge model since we don't need it.
 
 ### Migrations
-use `make_migrations` and `migrate` to synchronize the schema to current space.
+Use `make_migrations` and `migrate` to synchronize the schema to current space.
+Please note that only final consistency on DB schema is currently supported.
 
 ```python
 from nebula_carina.models.migrations import make_migrations, migrate
@@ -160,6 +161,12 @@ make_migrations()
 # you can print out the result and check it
 # then, run migrate
 migrate(make_migrations())
+```
+
+#### Django
+If you are using Django, you can do the migration by the following command:
+```
+python manage.py nebulamigrate
 ```
 
 ### Data Model Method
@@ -281,16 +288,41 @@ async def what_a_complex_human_relation(character_id: str):
 
 #### Django
 Basically things are the same as in fastapi except that you have to use `.dict()` method to serialize a model before using it in response.
-Match method would be harder to use. A wrapper that support `.dict()` method will be implemented in 0.3.0.
+In django, you can use `ModelBuilder.serialized_match` method to directly get the serialized result of match method.
 ```python
 from example.models import VirtualCharacter
 from django.http import JsonResponse
+from nebula_carina.models.models import EdgeModel
+from nebula_carina.ngql.query.conditions import Q
+from nebula_carina.models.model_builder import ModelBuilder
 
 def some_view(request, character_id: str):
     vr = VirtualCharacter.objects.get(character_id)
     # make sure that use .dict() function to serialize the result
     return JsonResponse(vr.dict())
 
+
+def what_a_complex_human_relation(request, character_id: str):
+    return JsonResponse(ModelBuilder.serialized_match(
+        '(v)-[e:love]->(v2)-[e2:love]->(v3)', {
+            'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter,
+            'e2': EdgeModel, 'v3': VirtualCharacter
+        },
+        condition=Q(v__id=character_id),
+    ), safe=False)  # returns a list of dict with keys {v, e, v2, e2, v3}
+
+
+# same method as the previous one if you would like to access the models
+def what_a_complex_human_relation_another(request, character_id: str):
+    return JsonResponse([
+      single_match_result.dict() for single_match_result in ModelBuilder.match(
+        '(v)-[e:love]->(v2)-[e2:love]->(v3)', {
+          'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter,
+          'e2': EdgeModel, 'v3': VirtualCharacter
+        },
+        condition=Q(v__id=character_id),
+      )
+    ], safe=False)  # returns a list of dict with keys {v, e, v2, e2, v3}
 ```
 
 #### Flask
@@ -306,5 +338,5 @@ Flask usage is quite similar to the Django usage. Basically use `.dict()` functi
 - [ ] Default values for schema models
 - [ ] Generic Vertex Model
 - [x] Basic Django Support
-  - [ ] Django management.py
-  - [ ] Match Result Wrapper
+  - [x] Django management.py
+  - [x] Match Result Wrapper
