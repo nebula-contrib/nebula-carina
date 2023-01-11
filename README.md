@@ -243,7 +243,7 @@ from nebula_carina.ngql.query.match import Limit
 from nebula_carina.models.models import EdgeModel
 
 
-ModelBuilder.match('(v)', {'v': VirtualCharacter}, limit=Limit(10))
+ModelBuilder.match('(v:figure:source)', {'v': VirtualCharacter}, limit=Limit(10))
 
 ModelBuilder.match(
     '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter},
