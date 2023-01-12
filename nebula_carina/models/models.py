@@ -149,6 +149,10 @@ class EdgeTypeModel(NebulaSchemaModel):
         return ':' + cls.db_name()
 
 
+class UnknownEdgeType(EdgeTypeModel):
+    pass
+
+
 class NebulaRecordModelMetaClass(ModelMetaclass):
     def __new__(mcs, name, bases, namespace, **kwargs):
         cls = super().__new__(
@@ -327,14 +331,22 @@ class EdgeModel(NebulaRecordModel):
         edge_type_name = read_str(edge.name)
         ranking = edge.ranking
         # need a dict to hold all the edge types
-        edge_type = _edge_type_model_factory[edge_type_name]
+        if edge_type := _edge_type_model_factory.get(edge_type_name):
+            return cls(
+                src_vid=src,
+                dst_vid=dst,
+                ranking=ranking,
+                edge_type_name=edge_type_name,
+                edge_type=edge_type.from_props(edge.props),
+            )
+        # Unknown edge type
         return cls(
-            src_vid=src,
-            dst_vid=dst,
-            ranking=ranking,
-            edge_type_name=edge_type_name,
-            edge_type=edge_type.from_props(edge.props),
-        )
+                src_vid=src,
+                dst_vid=dst,
+                ranking=ranking,
+                edge_type_name=edge_type_name,
+                edge_type=UnknownEdgeType(),
+            )
 
     def upsert(self):
         _, edge_model = self.get_edge_type_and_model()

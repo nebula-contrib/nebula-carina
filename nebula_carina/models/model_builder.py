@@ -19,6 +19,9 @@ class SingleMatchResult(object):
         for key, value in self.__data.items():
             yield key, value
 
+    def __str__(self):
+        return str(self.__data)
+
 
 class ModelBuilder(object):
     @staticmethod

@@ -13,6 +13,7 @@ setup(
     url='https://github.com/SwordElucidator/nebula-carina',
     license='MIT Licence',
     description='Nebula Database Modeling powered by Pydantic and Nebula Python.',
+    readme='README.md',
     packages=find_packages(),
     package_dir={'nebula_carina': 'nebula_carina'},
     python_requires='>=3.10',

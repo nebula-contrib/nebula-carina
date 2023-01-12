@@ -37,7 +37,7 @@ class BaseVertexManager(Manager):
 
     # easy functions
     def find_sources(
-            self, dst_vid: str | int, edge_type, *,
+            self, dst_vid: str | int, edge_type=None, *,
             distinct=False, limit: Limit = None
     ):
         if edge_type is None:
