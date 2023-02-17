@@ -5,7 +5,7 @@ from inspect import isclass
 from typing import Iterable
 
 from nebula3.common.ttypes import Vertex, Tag, Edge
-from pydantic import BaseModel
+from pydantic import BaseModel, StrictStr, StrictInt
 from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
 
@@ -186,7 +186,7 @@ class NebulaRecordModel(BaseModel, NebulaConvertableProtocol, metaclass=NebulaRe
 
 class VertexModel(NebulaRecordModel):
 
-    vid: int | str
+    vid: StrictInt | StrictStr
     objects = BaseVertexManager()
 
     @classmethod
@@ -310,8 +310,8 @@ class VertexModel(NebulaRecordModel):
 
 
 class EdgeModel(NebulaRecordModel):
-    src_vid: int | str
-    dst_vid: int | str
+    src_vid: StrictInt | StrictStr
+    dst_vid: StrictInt | StrictStr
     ranking: int = 0
     edge_type_name: str | None  # for view only
     edge_type: EdgeTypeModel  # only one edge type
