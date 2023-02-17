@@ -7,7 +7,7 @@ long_description = (base_dir / 'README.md').read_text()
 
 setup(
     name='nebula-carina',
-    version='0.3.0',
+    version='0.3.1',
     author='Sword Elucidator',
     author_email='nagisa940216@gmail.com',
     url='https://github.com/SwordElucidator/nebula-carina',
