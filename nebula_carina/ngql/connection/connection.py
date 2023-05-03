@@ -103,11 +103,11 @@ def run_ngql(
 ) -> ResultSet:
     return LocalSession().run_ngql(ngql, is_spacial_operation=is_spacial_operation)
 
-
-from nebula_carina.ngql.schema.space import create_space, show_spaces  # noqa
-if database_settings.auto_create_default_space_with_vid_desc and database_settings.default_space not in show_spaces():
-    create_space(
-        database_settings.default_space,
-        database_settings.auto_create_default_space_with_vid_desc,
-        if_not_exists=True
-    )
+if __name__ == '__main__':
+    from nebula_carina.ngql.schema.space import create_space, show_spaces  # noqa
+    if database_settings.auto_create_default_space_with_vid_desc and database_settings.default_space not in show_spaces():
+        create_space(
+            database_settings.default_space,
+            database_settings.auto_create_default_space_with_vid_desc,
+            if_not_exists=True
+        )
