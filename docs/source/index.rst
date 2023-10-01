@@ -11,7 +11,6 @@ Welcome to nebula-carina's documentation!
    :caption: Contents:
       nebula-carina
 
-
 Indices and tables
 ==================
 
