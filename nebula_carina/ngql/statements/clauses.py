@@ -6,9 +6,7 @@ class OrderBy(Statement):
 
     def __init__(self, expressions: list[str]):
         def make_expr(expr):
-            if expr[0] == '-':
-                return False, expr[1::]
-            return True, expr
+            return (False, expr[1::]) if expr[0] == '-' else (True, expr)
         self.expressions = [make_expr(expression) for expression in expressions]
 
     def __str__(self):
