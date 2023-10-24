@@ -101,9 +101,7 @@ class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
                 adds.append(db_field)
             elif db_field != from_dict[name]:
                 changes.append(db_field)
-        for name, db_field in from_dict.items():
-            if name not in to_dict:
-                drop_names.append(name)
+        drop_names.extend(name for name in from_dict if name not in to_dict)
         if adds or drop_names or changes:
             alter_definitions = []
             if adds:
@@ -129,9 +127,7 @@ class TagModel(NebulaSchemaModel):
         """
         return the db names pattern e.g.  ":figure:source"
         """
-        if cls is TagModel:
-            return ''
-        return ':' + cls.db_name()
+        return '' if cls is TagModel else f':{cls.db_name()}'
 
 
 class EdgeTypeModel(NebulaSchemaModel):
