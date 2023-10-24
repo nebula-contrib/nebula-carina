@@ -18,10 +18,7 @@ class NebulaFieldInfo(FieldInfo):
 
     def __init__(self, data_type: Union[DataType, Type[DataType]], default: Any = Undefined, **kwargs: Any) -> None:
         super().__init__(default, **kwargs)
-        if isinstance(data_type, DataType):
-            self.data_type = data_type
-        else:
-            self.data_type = data_type()
+        self.data_type = data_type if isinstance(data_type, DataType) else data_type()
 
     def create_db_field(self, field_name) -> SchemaField:
         return SchemaField(
