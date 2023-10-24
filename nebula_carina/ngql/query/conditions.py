@@ -49,7 +49,7 @@ class NodeConditionLeaf(Condition):
             if p == 'id':
                 pattern = f'id({pattern})'
             else:
-                pattern += '.' + p if pattern else p
+                pattern += f'.{p}' if pattern else p
         return pattern
 
     def __str__(self):

@@ -140,9 +140,7 @@ class EdgeTypeModel(NebulaSchemaModel):
         """
         return the db names pattern e.g.  ":figure:source"
         """
-        if cls is EdgeTypeModel:
-            return ''
-        return ':' + cls.db_name()
+        return '' if cls is EdgeTypeModel else f':{cls.db_name()}'
 
 
 class UnknownEdgeType(EdgeTypeModel):
