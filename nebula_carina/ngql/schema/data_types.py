@@ -55,7 +55,7 @@ class _DigitType(DataType):
         if value is None:
             return 'NULL'
         if not str(value).isdigit():
-            raise ValueError('%s value should be None or digit' % cls.__name__)
+            raise ValueError(f'{cls.__name__} value should be None or digit')
         return str(value)
 
 
