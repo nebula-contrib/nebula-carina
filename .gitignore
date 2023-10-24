@@ -49,3 +49,7 @@ node_modules
 screenshots
 .idea
 .better_test.db
+
+/docs/source/*
+!/docs/source/conf.py
+!/docs/source/index.rst
