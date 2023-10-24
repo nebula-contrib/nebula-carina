@@ -91,9 +91,7 @@ class String(DataType):
 
     @classmethod
     def value2db_str(cls, value):
-        if value is None:
-            return 'NULL'
-        return f'"{value}"'
+        return 'NULL' if value is None else f'"{value}"'
 
 
 class FixedString(DataType):
@@ -115,9 +113,7 @@ class FixedString(DataType):
 
     @classmethod
     def value2db_str(cls, value):
-        if value is None:
-            return 'NULL'
-        return f'"{value}"'
+        return 'NULL' if value is None else f'"{value}"'
 
 
 class Bool(DataType):
@@ -129,7 +125,7 @@ class Bool(DataType):
         if value is None:
             return 'NULL'
         return 'true' if value else 'false'
-    
+
 
 class Date(DataType):
     nebula_ttype = ttypes.Date
