@@ -49,6 +49,4 @@ def classproperty(func):
 
 
 def vid2str(vid: str | int):
-    if isinstance(vid, str):
-        return f'"{vid}"'
-    return str(vid)
+    return f'"{vid}"' if isinstance(vid, str) else str(vid)
