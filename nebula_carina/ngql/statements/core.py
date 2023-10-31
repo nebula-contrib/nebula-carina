@@ -12,5 +12,7 @@ class Statement(ABC):
         return self.__str__()
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-               and not any(getattr(self, s, None) != getattr(other, s, None) for s in self.__slots__)
+        return isinstance(other, self.__class__) and all(
+            getattr(self, s, None) == getattr(other, s, None)
+            for s in self.__slots__
+        )

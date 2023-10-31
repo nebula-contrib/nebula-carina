@@ -27,7 +27,7 @@ def insert_vertex_ngql(
         f'{tag_prop_name} ({", ".join(field_names)})' for tag_prop_name, field_names in tag_props.items()
     )
     prop_def = ', '.join(
-        f'{vid2str(vid)}: ({", ".join(prop_val for prop_val in prop_values)})'
+        f'{vid2str(vid)}: ({", ".join(prop_values)})'
         for vid, prop_values in prop_values_dict.items()
     )
 

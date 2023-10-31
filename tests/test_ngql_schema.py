@@ -73,7 +73,7 @@ class TestSchema(TestWithNewSpace):
         ))
         described_schema_fields = describe_tag(tag_name)
         altered_schema = [
-            (to_alter_property_dict[i.prop_name] if i.prop_name in to_alter_property_dict else i)
+            to_alter_property_dict.get(i.prop_name, i)
             for i in schema_fields + to_add_properties
             if i.prop_name not in to_drop_property_names
         ]
@@ -143,7 +143,7 @@ class TestSchema(TestWithNewSpace):
         ))
         described_schema_fields = describe_edge(edge_name)
         altered_schema = [
-            (to_alter_property_dict[i.prop_name] if i.prop_name in to_alter_property_dict else i)
+            to_alter_property_dict.get(i.prop_name, i)
             for i in schema_fields + to_add_properties
             if i.prop_name not in to_drop_property_names
         ]

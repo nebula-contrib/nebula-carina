@@ -55,7 +55,7 @@ class _DigitType(DataType):
         if value is None:
             return 'NULL'
         if not str(value).isdigit():
-            raise ValueError('%s value should be None or digit' % cls.__name__)
+            raise ValueError(f'{cls.__name__} value should be None or digit')
         return str(value)
 
 
@@ -91,9 +91,7 @@ class String(DataType):
 
     @classmethod
     def value2db_str(cls, value):
-        if value is None:
-            return 'NULL'
-        return f'"{value}"'
+        return 'NULL' if value is None else f'"{value}"'
 
 
 class FixedString(DataType):
@@ -115,9 +113,7 @@ class FixedString(DataType):
 
     @classmethod
     def value2db_str(cls, value):
-        if value is None:
-            return 'NULL'
-        return f'"{value}"'
+        return 'NULL' if value is None else f'"{value}"'
 
 
 class Bool(DataType):
@@ -129,7 +125,7 @@ class Bool(DataType):
         if value is None:
             return 'NULL'
         return 'true' if value else 'false'
-    
+
 
 class Date(DataType):
     nebula_ttype = ttypes.Date
@@ -235,13 +231,11 @@ def string_to_data_type(db_type_string: str) -> DataType:
         db_type = split_string[0]
     else:
         db_type, additional = split_string
-        additional = additional[0:-1]
-    data_type_class = data_type_factory.get(db_type)
-    if not data_type_class:
+        additional = additional[:-1]
+    if data_type_class := data_type_factory.get(db_type):
+        return data_type_class(additional) if additional else data_type_class()
+    else:
         raise RuntimeError('Cannot find the data type!')
-    if additional:
-        return data_type_class(additional)
-    return data_type_class()
 
 
 def ttype2python_value(val:  any):
