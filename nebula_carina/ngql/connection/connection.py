@@ -81,18 +81,16 @@ class LocalSession(object):
         try:
             result = self._main_session.execute(ngql)
         except (IOErrorException, RuntimeError):
-            if not self._main_session.ping():
-                self.recover_session()
-                result = self.session.execute(ngql)
-            else:
+            if self._main_session.ping():
                 raise
+            self.recover_session()
+            result = self.session.execute(ngql)
         if result.error_code() < 0:
-            if 'Session not existed!' in result.error_msg():
-                self.recover_session()
-                result = self.session.execute(ngql)
-                if result.error_code() < 0:
-                    raise NGqlError(result.error_msg(), result.error_code(), ngql)
-            else:
+            if 'Session not existed!' not in result.error_msg():
+                raise NGqlError(result.error_msg(), result.error_code(), ngql)
+            self.recover_session()
+            result = self.session.execute(ngql)
+            if result.error_code() < 0:
                 raise NGqlError(result.error_msg(), result.error_code(), ngql)
         return result
 
