@@ -46,24 +46,24 @@ class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
     @classmethod
     def _create_db_fields(cls):
         return [
-            field.field_info.create_db_field(field_name) for field_name, field in cls.__fields__.items()
+            field.field_info.create_db_field(field_name) for field_name, field in cls.model_fields.items()
             if isinstance(field.field_info, NebulaFieldInfo)
         ]
 
     @classmethod
     def get_db_field_names(cls) -> list[str]:
         return [
-            field_name for field_name, field in cls.__fields__.items() if isinstance(field.field_info, NebulaFieldInfo)
+            field_name for field_name, field in cls.model_fields.items() if isinstance(field.field_info, NebulaFieldInfo)
         ]
 
     def get_db_field_dict(self) -> dict[str, any]:
         return {
             field_name: field.field_info.data_type.value2db_str(getattr(self, field_name))
-            for field_name, field in self.__class__.__fields__.items() if isinstance(field.field_info, NebulaFieldInfo)
+            for field_name, field in self.__class__.model_fields.items() if isinstance(field.field_info, NebulaFieldInfo)
         }
 
     def get_db_field_value(self, field_name) -> str:
-        return self.__class__.__fields__[field_name].field_info.data_type.value2db_str(getattr(self, field_name))
+        return self.__class__.model_fields[field_name].field_info.data_type.value2db_str(getattr(self, field_name))
 
     @classmethod
     def db_name(cls):
@@ -188,7 +188,7 @@ class VertexModel(NebulaRecordModel):
         """
         return the iterator of tuple[name, tag model] of this class
         """
-        for name, field in cls.__fields__.items():
+        for name, field in cls.model_fields.items():
             if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel):
                 yield name, field.type_, field.required
 
@@ -237,7 +237,7 @@ class VertexModel(NebulaRecordModel):
         )
 
     def _get_tag_models(self):
-        for name, field in self.__class__.__fields__.items():
+        for name, field in self.__class__.model_fields.items():
             if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel) \
                     and getattr(self, name, None):
                 yield name, field.type_
@@ -307,7 +307,7 @@ class EdgeModel(NebulaRecordModel):
     src_vid: StrictInt | StrictStr
     dst_vid: StrictInt | StrictStr
     ranking: int = 0
-    edge_type_name: str | None  # for view only
+    edge_type_name: str | None = None  # for view only
     edge_type: EdgeTypeModel  # only one edge type
     objects = BaseEdgeManager()
 
