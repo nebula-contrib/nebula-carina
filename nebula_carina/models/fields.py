@@ -1,7 +1,7 @@
 from typing import Union, Any, Optional, TYPE_CHECKING, Type
 
-from pydantic.fields import FieldInfo
-from pydantic.typing import NoArgAnyCallable
+from pydantic.v1.fields import FieldInfo
+from pydantic.v1.typing import NoArgAnyCallable
 from nebula_carina.ngql.schema.data_types import DataType, FixedString
 from nebula_carina.ngql.statements.schema import SchemaField
 

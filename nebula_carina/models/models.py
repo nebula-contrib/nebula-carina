@@ -6,8 +6,11 @@ from typing import Iterable
 
 from nebula3.common.ttypes import Vertex, Tag, Edge
 from pydantic import BaseModel, StrictStr, StrictInt
-from pydantic.fields import ModelField
-from pydantic.main import ModelMetaclass
+from pydantic.v1.fields import ModelField
+
+# Workaround form ModelMetaClass not being supposed to be used publicly
+# https://github.com/pydantic/pydantic/issues/6381
+from pydantic._internal._model_construction import ModelMetaclass
 
 from nebula_carina.models.abstract import NebulaConvertableProtocol
 from nebula_carina.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError, DuplicateEdgeTypeNameError
@@ -46,24 +49,24 @@ class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
     @classmethod
     def _create_db_fields(cls):
         return [
-            field.field_info.create_db_field(field_name) for field_name, field in cls.model_fields.items()
-            if isinstance(field.field_info, NebulaFieldInfo)
+            field_info.create_db_field(field_name) for field_name, field_info in cls.model_fields.items()
+            if isinstance(field_info, NebulaFieldInfo)
         ]
 
     @classmethod
     def get_db_field_names(cls) -> list[str]:
         return [
-            field_name for field_name, field in cls.model_fields.items() if isinstance(field.field_info, NebulaFieldInfo)
+            field_name for field_name, field_info in cls.model_fields.items() if isinstance(field_info, NebulaFieldInfo)
         ]
 
     def get_db_field_dict(self) -> dict[str, any]:
         return {
-            field_name: field.field_info.data_type.value2db_str(getattr(self, field_name))
-            for field_name, field in self.__class__.model_fields.items() if isinstance(field.field_info, NebulaFieldInfo)
+            field_name: field_info.data_type.value2db_str(getattr(self, field_name))
+            for field_name, field_info in self.__class__.model_fields.items() if isinstance(field_info, NebulaFieldInfo)
         }
 
     def get_db_field_value(self, field_name) -> str:
-        return self.__class__.model_fields[field_name].field_info.data_type.value2db_str(getattr(self, field_name))
+        return self.__class__.model_fields[field_name].data_type.value2db_str(getattr(self, field_name))
 
     @classmethod
     def db_name(cls):
@@ -188,7 +191,7 @@ class VertexModel(NebulaRecordModel):
         """
         return the iterator of tuple[name, tag model] of this class
         """
-        for name, field in cls.model_fields.items():
+        for name, field in cls.__fields__.items():
             if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel):
                 yield name, field.type_, field.required
 
@@ -237,7 +240,7 @@ class VertexModel(NebulaRecordModel):
         )
 
     def _get_tag_models(self):
-        for name, field in self.__class__.model_fields.items():
+        for name, field in self.__class__.__fields__.items():
             if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel) \
                     and getattr(self, name, None):
                 yield name, field.type_
