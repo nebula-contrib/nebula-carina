@@ -13,20 +13,37 @@ from pydantic.v1.fields import ModelField
 from pydantic._internal._model_construction import ModelMetaclass
 
 from nebula_carina.models.abstract import NebulaConvertableProtocol
-from nebula_carina.models.errors import VertexDoesNotExistError, EdgeDoesNotExistError, DuplicateEdgeTypeNameError
+from nebula_carina.models.errors import (
+    VertexDoesNotExistError,
+    EdgeDoesNotExistError,
+    DuplicateEdgeTypeNameError,
+)
 from nebula_carina.models.fields import NebulaFieldInfo
 from nebula_carina.models.managers import Manager, BaseVertexManager, BaseEdgeManager
 from nebula_carina.models.model_builder import ModelBuilder
 from nebula_carina.ngql.connection.connection import run_ngql
 from nebula_carina.ngql.query.conditions import Q
-from nebula_carina.ngql.record.edge import update_edge_ngql, insert_edge_ngql, upsert_edge_ngql
+from nebula_carina.ngql.record.edge import (
+    update_edge_ngql,
+    insert_edge_ngql,
+    upsert_edge_ngql,
+)
 from nebula_carina.ngql.schema.data_types import ttype2python_value
-from nebula_carina.ngql.schema.schema import Ttl, Alter, \
-    create_schema_ngql, describe_schema, alter_schema_ngql
+from nebula_carina.ngql.schema.schema import (
+    Ttl,
+    Alter,
+    create_schema_ngql,
+    describe_schema,
+    alter_schema_ngql,
+)
 from nebula_carina.ngql.statements.clauses import Limit
 from nebula_carina.ngql.statements.edge import EdgeDefinition, EdgeValue
 from nebula_carina.ngql.statements.schema import AlterType, SchemaType
-from nebula_carina.ngql.record.vertex import insert_vertex_ngql, update_vertex_ngql, upsert_vertex_ngql
+from nebula_carina.ngql.record.vertex import (
+    insert_vertex_ngql,
+    update_vertex_ngql,
+    upsert_vertex_ngql,
+)
 from nebula_carina.utils.utils import pascal_case_to_snake_case, read_str, classproperty
 
 
@@ -34,10 +51,9 @@ _edge_type_model_factory = {}
 
 
 class NebulaSchemaModelMetaClass(ModelMetaclass):
-
     def __init__(cls, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if 'EdgeTypeModel' in globals() and issubclass(cls, EdgeTypeModel):
+        if "EdgeTypeModel" in globals() and issubclass(cls, EdgeTypeModel):
             db_name = cls.db_name()
             if db_name in _edge_type_model_factory:
                 raise DuplicateEdgeTypeNameError(cls.__name__)
@@ -45,28 +61,33 @@ class NebulaSchemaModelMetaClass(ModelMetaclass):
 
 
 class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
-
     @classmethod
     def _create_db_fields(cls):
         return [
-            field_info.create_db_field(field_name) for field_name, field_info in cls.model_fields.items()
-            if isinstance(field_info, NebulaFieldInfo)
+            field_info.create_db_field(field_name)
+            for field_name, field_info in cls.model_fields.items()
+            if isinstance(field_info.default, NebulaFieldInfo)
         ]
 
     @classmethod
     def get_db_field_names(cls) -> list[str]:
         return [
-            field_name for field_name, field_info in cls.model_fields.items() if isinstance(field_info, NebulaFieldInfo)
+            field_name
+            for field_name, field_info in cls.model_fields.items()
+            if isinstance(field_info.default, NebulaFieldInfo)
         ]
 
     def get_db_field_dict(self) -> dict[str, any]:
         return {
             field_name: field_info.data_type.value2db_str(getattr(self, field_name))
-            for field_name, field_info in self.__class__.model_fields.items() if isinstance(field_info, NebulaFieldInfo)
+            for field_name, field_info in self.__class__.model_fields.items()
+            if isinstance(field_info.default, NebulaFieldInfo)
         }
 
     def get_db_field_value(self, field_name) -> str:
-        return self.__class__.model_fields[field_name].data_type.value2db_str(getattr(self, field_name))
+        return self.__class__.model_fields[field_name].default.data_type.value2db_str(
+            getattr(self, field_name)
+        )
 
     @classmethod
     def db_name(cls):
@@ -85,18 +106,23 @@ class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
     @classmethod
     def create_schema_ngql(cls):
         db_fields = cls._create_db_fields()
-        meta_cls = getattr(cls, 'Meta', None)
+        meta_cls = getattr(cls, "Meta", None)
         return create_schema_ngql(
             cls.get_schema_type(),
-            cls.db_name(), db_fields,
+            cls.db_name(),
+            db_fields,
             ttl_definition=Ttl(meta_cls.ttl_duration, meta_cls.ttl_col)
-            if meta_cls and getattr(meta_cls, 'ttl_duration', None) else None
+            if meta_cls and getattr(meta_cls, "ttl_duration", None)
+            else None,
         )
 
     @classmethod
     def alter_schema_ngql(cls):
         # TODO ttl where to get the ttl info?
-        from_dict = {db_field.prop_name: db_field for db_field in describe_schema(cls.get_schema_type(), cls.db_name())}
+        from_dict = {
+            db_field.prop_name: db_field
+            for db_field in describe_schema(cls.get_schema_type(), cls.db_name())
+        }
         to_dict = {db_field.prop_name: db_field for db_field in cls._create_db_fields()}
         adds, drop_names, changes = [], [], []
         for name, db_field in to_dict.items():
@@ -114,7 +140,8 @@ class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
             if drop_names:
                 alter_definitions.append(Alter(AlterType.DROP, prop_names=drop_names))
             return alter_schema_ngql(
-                cls.get_schema_type(), cls.db_name(),
+                cls.get_schema_type(),
+                cls.db_name(),
                 alter_definitions=alter_definitions,
             )
         return None
@@ -123,27 +150,34 @@ class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
 class TagModel(NebulaSchemaModel):
     @classmethod
     def from_tag(cls, tag: Tag):
-        return cls(**{read_str(prop): ttype2python_value(value.value) for prop, value in tag.props.items()})
+        return cls(
+            **{
+                read_str(prop): ttype2python_value(value.value)
+                for prop, value in tag.props.items()
+            }
+        )
 
     @classmethod
     def get_db_name_pattern(cls) -> str:
         """
         return the db names pattern e.g.  ":figure:source"
         """
-        return '' if cls is TagModel else f':{cls.db_name()}'
+        return "" if cls is TagModel else f":{cls.db_name()}"
 
 
 class EdgeTypeModel(NebulaSchemaModel):
     @classmethod
     def from_props(cls, props: dict[str, any]):
-        return cls(**{read_str(prop): read_str(value.value) for prop, value in props.items()})
+        return cls(
+            **{read_str(prop): read_str(value.value) for prop, value in props.items()}
+        )
 
     @classmethod
     def get_db_name_pattern(cls) -> str:
         """
         return the db names pattern e.g.  ":figure:source"
         """
-        return '' if cls is EdgeTypeModel else f':{cls.db_name()}'
+        return "" if cls is EdgeTypeModel else f":{cls.db_name()}"
 
 
 class UnknownEdgeType(EdgeTypeModel):
@@ -153,13 +187,19 @@ class UnknownEdgeType(EdgeTypeModel):
 class NebulaRecordModelMetaClass(ModelMetaclass):
     def __new__(mcs, name, bases, namespace, **kwargs):
         cls = super().__new__(
-            mcs, name, bases, {
-                name: field for name, field in namespace.items() if not isinstance(field, Manager)
-            }, **kwargs
+            mcs,
+            name,
+            bases,
+            {
+                name: field
+                for name, field in namespace.items()
+                if not isinstance(field, Manager)
+            },
+            **kwargs,
         )
-        setattr(cls, '_managers', {})
+        setattr(cls, "_managers", {})
         for base in cls.__bases__:
-            if 'NebulaRecordModel' in globals() and issubclass(base, NebulaRecordModel):
+            if "NebulaRecordModel" in globals() and issubclass(base, NebulaRecordModel):
                 cls._managers.update(deepcopy(base._managers))
         for name, field in namespace.items():
             if isinstance(field, Manager):
@@ -170,19 +210,20 @@ class NebulaRecordModelMetaClass(ModelMetaclass):
 
     def __init__(cls, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if hasattr(cls, '_managers'):
+        if hasattr(cls, "_managers"):
             for key, val in cls._managers.items():
                 if isinstance(val, Manager):
                     setattr(cls, key, val)
                     val.register(cls)
 
 
-class NebulaRecordModel(BaseModel, NebulaConvertableProtocol, metaclass=NebulaRecordModelMetaClass):
+class NebulaRecordModel(
+    BaseModel, NebulaConvertableProtocol, metaclass=NebulaRecordModelMetaClass
+):
     objects = BaseVertexManager()
 
 
 class VertexModel(NebulaRecordModel):
-
     vid: StrictInt | StrictStr
     objects = BaseVertexManager()
 
@@ -192,7 +233,11 @@ class VertexModel(NebulaRecordModel):
         return the iterator of tuple[name, tag model] of this class
         """
         for name, field in cls.__fields__.items():
-            if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel):
+            if (
+                isinstance(field, ModelField)
+                and isclass(field.type_)
+                and issubclass(field.type_, TagModel)
+            ):
                 yield name, field.type_, field.required
 
     @classmethod
@@ -202,9 +247,7 @@ class VertexModel(NebulaRecordModel):
         note that the tag name might be different from the tag's db name
         e.g. {'figure': <class 'example.models.Figure'>, 'source1': <class 'example.models.Source'>}
         """
-        return {
-            name: tag_model for name, tag_model, _ in cls.iterate_tag_models()
-        }
+        return {name: tag_model for name, tag_model, _ in cls.iterate_tag_models()}
 
     @classmethod
     def from_nebula_db_cls(cls, raw_db_item: Vertex | Edge):
@@ -224,8 +267,9 @@ class VertexModel(NebulaRecordModel):
             vid=vid,
             **{
                 read_str(tag.name): tag_dict[read_str(tag.name)].from_tag(tag)
-                for tag in vertex.tags if read_str(tag.name) in tag_dict
-            }
+                for tag in vertex.tags
+                if read_str(tag.name) in tag_dict
+            },
         )
 
     @classmethod
@@ -233,28 +277,47 @@ class VertexModel(NebulaRecordModel):
         """
         return the db names pattern e.g.  ":figure:source"
         """
-        required_only = True  # FIXME: maybe we will allow non-required feature in future
-        return ''.join(
-            tag_model.get_db_name_pattern() for _, tag_model, required in cls.iterate_tag_models()
+        required_only = (
+            True  # FIXME: maybe we will allow non-required feature in future
+        )
+        return "".join(
+            tag_model.get_db_name_pattern()
+            for _, tag_model, required in cls.iterate_tag_models()
             if not required_only or required
         )
 
     def _get_tag_models(self):
         for name, field in self.__class__.__fields__.items():
-            if isinstance(field, ModelField) and isclass(field.type_) and issubclass(field.type_, TagModel) \
-                    and getattr(self, name, None):
+            if (
+                isinstance(field, ModelField)
+                and isclass(field.type_)
+                and issubclass(field.type_, TagModel)
+                and getattr(self, name, None)
+            ):
                 yield name, field.type_
 
     def upsert(self):
         for name, tag_model in self._get_tag_models():
-            run_ngql(upsert_vertex_ngql(tag_model.db_name(), self.vid, getattr(self, name).get_db_field_dict()))
+            run_ngql(
+                upsert_vertex_ngql(
+                    tag_model.db_name(),
+                    self.vid,
+                    getattr(self, name).get_db_field_dict(),
+                )
+            )
 
     def save(self, *, if_not_exists: bool = False):
         #   并发不安全，如果需要并发安全，需要考虑upsert
         try:
             self.objects.get(self.vid)
             for name, tag_model in self._get_tag_models():
-                run_ngql(update_vertex_ngql(tag_model.db_name(), self.vid, getattr(self, name).get_db_field_dict()))
+                run_ngql(
+                    update_vertex_ngql(
+                        tag_model.db_name(),
+                        self.vid,
+                        getattr(self, name).get_db_field_dict(),
+                    )
+                )
         except VertexDoesNotExistError:
             tag_props = OrderedDict()
             data = []
@@ -266,44 +329,62 @@ class VertexModel(NebulaRecordModel):
                         for field_name in tag_props[tag_model.db_name()]
                     ]
                 )
-            ngql = insert_vertex_ngql(tag_props, {self.vid: data}, if_not_exists=if_not_exists)
+            ngql = insert_vertex_ngql(
+                tag_props, {self.vid: data}, if_not_exists=if_not_exists
+            )
             run_ngql(ngql)
 
     def get_out_edges(self, edge_type: EdgeTypeModel = None, *, limit: Limit = None):
         return EdgeModel.objects.find_by_source(self.vid, edge_type, limit=limit)
 
-    def get_out_edge_and_destinations(self, edge_type, dst_vertex_model, *, limit: Limit = None) \
-            -> Iterable[dict[str, NebulaConvertableProtocol]]:
+    def get_out_edge_and_destinations(
+        self, edge_type, dst_vertex_model, *, limit: Limit = None
+    ) -> Iterable[dict[str, NebulaConvertableProtocol]]:
         if edge_type is None:
             edge_type = EdgeTypeModel
         return (
-            {'edge': r['e'], 'dst': r['v2']} for r in ModelBuilder.match(
-                f'(v1)-[e{edge_type.get_db_name_pattern()}]->(v2{dst_vertex_model.get_db_name_pattern()})',
-                {'e': EdgeModel, 'v2': dst_vertex_model},
-                condition=Q(v1__id=self.vid), limit=limit
+            {"edge": r["e"], "dst": r["v2"]}
+            for r in ModelBuilder.match(
+                f"(v1)-[e{edge_type.get_db_name_pattern()}]->(v2{dst_vertex_model.get_db_name_pattern()})",
+                {"e": EdgeModel, "v2": dst_vertex_model},
+                condition=Q(v1__id=self.vid),
+                limit=limit,
             )
         )
 
-    def get_destinations(self, edge_type, dst_vertex_model, *, distinct=False, limit: Limit = None):
-        return dst_vertex_model.objects.find_destinations(self.vid, edge_type, distinct=distinct, limit=limit)
+    def get_destinations(
+        self, edge_type, dst_vertex_model, *, distinct=False, limit: Limit = None
+    ):
+        return dst_vertex_model.objects.find_destinations(
+            self.vid, edge_type, distinct=distinct, limit=limit
+        )
 
-    def get_reverse_edges(self, edge_type: EdgeTypeModel = None, *, limit: Limit = None):
+    def get_reverse_edges(
+        self, edge_type: EdgeTypeModel = None, *, limit: Limit = None
+    ):
         return EdgeModel.objects.find_by_destination(self.vid, edge_type, limit=limit)
 
-    def get_reverse_edge_and_sources(self, edge_type, src_vertex_model, *, limit: Limit = None) \
-            -> Iterable[dict[str, NebulaConvertableProtocol]]:
+    def get_reverse_edge_and_sources(
+        self, edge_type, src_vertex_model, *, limit: Limit = None
+    ) -> Iterable[dict[str, NebulaConvertableProtocol]]:
         if edge_type is None:
             edge_type = EdgeTypeModel
         return (
-            {'edge': r['e'], 'src': r['v1']} for r in ModelBuilder.match(
-                f'(v1{src_vertex_model.get_db_name_pattern()})-[e{edge_type.get_db_name_pattern()}]->(v2)',
-                {'e': EdgeModel, 'v1': src_vertex_model},
-                condition=Q(v2__id=self.vid), limit=limit
+            {"edge": r["e"], "src": r["v1"]}
+            for r in ModelBuilder.match(
+                f"(v1{src_vertex_model.get_db_name_pattern()})-[e{edge_type.get_db_name_pattern()}]->(v2)",
+                {"e": EdgeModel, "v1": src_vertex_model},
+                condition=Q(v2__id=self.vid),
+                limit=limit,
             )
         )
 
-    def get_sources(self, edge_type, src_vertex_model, *, distinct=False, limit: Limit = None):
-        return src_vertex_model.objects.find_sources(self.vid, edge_type, distinct=distinct, limit=limit)
+    def get_sources(
+        self, edge_type, src_vertex_model, *, distinct=False, limit: Limit = None
+    ):
+        return src_vertex_model.objects.find_sources(
+            self.vid, edge_type, distinct=distinct, limit=limit
+        )
 
 
 class EdgeModel(NebulaRecordModel):
@@ -338,19 +419,22 @@ class EdgeModel(NebulaRecordModel):
             )
         # Unknown edge type
         return cls(
-                src_vid=src,
-                dst_vid=dst,
-                ranking=ranking,
-                edge_type_name=edge_type_name,
-                edge_type=UnknownEdgeType(),
-            )
+            src_vid=src,
+            dst_vid=dst,
+            ranking=ranking,
+            edge_type_name=edge_type_name,
+            edge_type=UnknownEdgeType(),
+        )
 
     def upsert(self):
         _, edge_model = self.get_edge_type_and_model()
-        run_ngql(upsert_edge_ngql(
-            edge_model.db_name(), EdgeDefinition(self.src_vid, self.dst_vid, self.ranking),
-            self.edge_type.get_db_field_dict()
-        ))
+        run_ngql(
+            upsert_edge_ngql(
+                edge_model.db_name(),
+                EdgeDefinition(self.src_vid, self.dst_vid, self.ranking),
+                self.edge_type.get_db_field_dict(),
+            )
+        )
 
     def save(self, *, if_not_exists: bool = False):
         #   并发不安全，如果需要并发安全，需要考虑upsert
@@ -358,20 +442,29 @@ class EdgeModel(NebulaRecordModel):
         try:
             self.objects.get(self.src_vid, self.dst_vid, self.edge_type.__class__)
 
-            run_ngql(update_edge_ngql(
-                edge_type_model.db_name(),
-                EdgeDefinition(self.src_vid, self.dst_vid, self.ranking),
-                self.edge_type.get_db_field_dict()
-            ))
+            run_ngql(
+                update_edge_ngql(
+                    edge_type_model.db_name(),
+                    EdgeDefinition(self.src_vid, self.dst_vid, self.ranking),
+                    self.edge_type.get_db_field_dict(),
+                )
+            )
         except EdgeDoesNotExistError:
             db_field_names = edge_type_model.get_db_field_names()
             ngql = insert_edge_ngql(
-                edge_type_model.db_name(), db_field_names,
-                [EdgeValue(
-                    self.src_vid, self.dst_vid,
-                    [self.edge_type.get_db_field_value(field_name) for field_name in db_field_names],
-                    ranking=self.ranking
-                )],
-                if_not_exists=if_not_exists
+                edge_type_model.db_name(),
+                db_field_names,
+                [
+                    EdgeValue(
+                        self.src_vid,
+                        self.dst_vid,
+                        [
+                            self.edge_type.get_db_field_value(field_name)
+                            for field_name in db_field_names
+                        ],
+                        ranking=self.ranking,
+                    )
+                ],
+                if_not_exists=if_not_exists,
             )
             run_ngql(ngql)
