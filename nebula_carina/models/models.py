@@ -64,7 +64,7 @@ class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
     @classmethod
     def _create_db_fields(cls):
         return [
-            field_info.create_db_field(field_name)
+            field_info.default.create_db_field(field_name)
             for field_name, field_info in cls.model_fields.items()
             if isinstance(field_info.default, NebulaFieldInfo)
         ]
