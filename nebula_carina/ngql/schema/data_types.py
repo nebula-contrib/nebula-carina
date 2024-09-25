@@ -15,12 +15,12 @@ python_type2data_type = {}
 class DataTypeMetaClass(type):
     def __init__(cls, classname, superclasses, attributedict):
         super().__init__(classname, superclasses, attributedict)
-        if cls.__name__ != 'DataType':
+        if cls.__name__ != "DataType":
             data_type_factory[pascal_case_to_snake_case(cls.__name__).upper()] = cls
-            if hasattr(cls, 'nebula_ttype'):
-                ttype2data_type[getattr(cls, 'nebula_ttype')] = cls
-                if getattr(cls, 'is_data_type_for_auto_convert', False):
-                    python_type2data_type[getattr(cls, 'python_data_type')] = cls
+            if hasattr(cls, "nebula_ttype"):
+                ttype2data_type[getattr(cls, "nebula_ttype")] = cls
+                if getattr(cls, "is_data_type_for_auto_convert", False):
+                    python_type2data_type[getattr(cls, "python_data_type")] = cls
 
 
 class DataType(metaclass=DataTypeMetaClass):
@@ -53,9 +53,9 @@ class _DigitType(DataType):
     @classmethod
     def value2db_str(cls, value):
         if value is None:
-            return 'NULL'
+            return "NULL"
         if not str(value).isdigit():
-            raise ValueError(f'{cls.__name__} value should be None or digit')
+            raise ValueError(f"{cls.__name__} value should be None or digit")
         return str(value)
 
 
@@ -91,20 +91,20 @@ class String(DataType):
 
     @classmethod
     def value2db_str(cls, value):
-        return 'NULL' if value is None else f'"{value}"'
+        return "NULL" if value is None else f'"{value}"'
 
 
 class FixedString(DataType):
     python_data_type = str
 
-    __slots__ = ('max_length', )
+    __slots__ = ("max_length",)
 
     def __init__(self, max_length):
         super().__init__()
         self.max_length = int(max_length)
 
     def __str__(self):
-        return f'{super().__str__()}({self.max_length})'
+        return f"{super().__str__()}({self.max_length})"
 
     def __eq__(self, other):
         if not isinstance(other, FixedString):
@@ -113,7 +113,7 @@ class FixedString(DataType):
 
     @classmethod
     def value2db_str(cls, value):
-        return 'NULL' if value is None else f'"{value}"'
+        return "NULL" if value is None else f'"{value}"'
 
 
 class Bool(DataType):
@@ -123,13 +123,13 @@ class Bool(DataType):
     @classmethod
     def value2db_str(cls, value):
         if value is None:
-            return 'NULL'
-        return 'true' if value else 'false'
+            return "NULL"
+        return "true" if value else "false"
 
 
 class Date(DataType):
     nebula_ttype = ttypes.Date
-    auto = ''
+    auto = ""
     python_data_type = date
     is_data_type_for_auto_convert = True
 
@@ -137,95 +137,114 @@ class Date(DataType):
     def ttype2python_type(cls, value: ttypes.Date | str):
         if value is None:
             return
-        if value == 'date()':
-            return ''
+        if value == "date()":
+            return ""
         if isinstance(value, ttypes.Date):
             return date(value.year, value.month, value.day)
-        raise ValueError('Date value should be None or date')
+        raise ValueError("Date value should be None or date")
 
     @classmethod
     def value2db_str(cls, value: None | str | time):
         if value is None:
-            return 'NULL'
+            return "NULL"
         if value == Date.auto:
-            return 'date()'
-        assert isinstance(value, time), 'Date python value should be None or datetime.date'
+            return "date()"
+        assert isinstance(
+            value, time
+        ), "Date python value should be None or datetime.date"
         return f'date("{value}")'
 
 
 class Time(DataType):
     nebula_ttype = ttypes.Time
-    auto = ''
+    auto = ""
     python_data_type = time
     is_data_type_for_auto_convert = True
 
     @classmethod
     def clean_default(cls, default_value):
         if isinstance(default_value, time) and not default_value.tzinfo:
-            return default_value.replace(tzinfo=pytz.timezone(database_settings.timezone_name))
+            return default_value.replace(
+                tzinfo=pytz.timezone(database_settings.timezone_name)
+            )
         return default_value
 
     @classmethod
     def ttype2python_type(cls, value: ttypes.Time | str):
         if value is None:
             return
-        if value == 'time()':
-            return ''
+        if value == "time()":
+            return ""
         if isinstance(value, ttypes.Time):
             return time(
-                value.hour, value.minute, value.sec, value.microsec,
-                tzinfo=pytz.timezone(database_settings.timezone_name)
+                value.hour,
+                value.minute,
+                value.sec,
+                value.microsec,
+                tzinfo=pytz.timezone(database_settings.timezone_name),
             )
-        raise ValueError('Time value should be None or Time')
+        raise ValueError("Time value should be None or Time")
 
     @classmethod
     def value2db_str(cls, value: None | str | time):
         if value is None:
-            return 'NULL'
+            return "NULL"
         if value == Time.auto:
-            return 'time()'
-        assert isinstance(value, time), 'DateTime python value should be None or datetime.time'
+            return "time()"
+        assert isinstance(
+            value, time
+        ), "DateTime python value should be None or datetime.time"
         return f'time("{value}")'
 
 
 class Datetime(DataType):
     nebula_ttype = ttypes.DateTime
-    auto = ''
+    auto = ""
     python_data_type = datetime
     is_data_type_for_auto_convert = True
 
     @classmethod
     def clean_default(cls, default_value):
         if isinstance(default_value, datetime) and not default_value.tzinfo:
-            return default_value.replace(tzinfo=pytz.timezone(database_settings.timezone_name))
+            return default_value.replace(
+                tzinfo=pytz.timezone(database_settings.timezone_name)
+            )
         return default_value
 
     @classmethod
     def ttype2python_type(cls, value: ttypes.DateTime | str):
         if value is None:
             return
-        if value == 'datetime()':
-            return ''
+        if value == "datetime()":
+            return ""
         if isinstance(value, ttypes.DateTime):
             return datetime(
-                value.year, value.month, value.day, value.hour, value.minute, value.sec, value.microsec,
-                tzinfo=pytz.timezone(database_settings.timezone_name)
+                value.year,
+                value.month,
+                value.day,
+                value.hour,
+                value.minute,
+                value.sec,
+                value.microsec,
+                tzinfo=pytz.timezone(database_settings.timezone_name),
             )
-        raise ValueError('DateTime ngql value should be None or DateTime')
+        raise ValueError("DateTime ngql value should be None or DateTime")
 
     @classmethod
     def value2db_str(cls, value: None | str | datetime):
         if value is None:
-            return 'NULL'
+            return "NULL"
         if value == Datetime.auto:
-            return 'datetime()'
-        assert isinstance(value, datetime), 'DateTime python value should be None or datetime.datetime'
+            return "datetime()"
+        assert isinstance(
+            value, datetime
+        ), "DateTime python value should be None or datetime.datetime"
         return f'datetime("{value}")'
 
 
 def string_to_data_type(db_type_string: str) -> DataType:
     db_type_string = db_type_string.upper()
-    split_string = db_type_string.split('(', 1)
+    split_string = db_type_string.split("(", 1)
     db_type, additional = None, None
     if len(split_string) == 1:
         db_type = split_string[0]
@@ -235,14 +254,20 @@ def string_to_data_type(db_type_string: str) -> DataType:
     if data_type_class := data_type_factory.get(db_type):
         return data_type_class(additional) if additional else data_type_class()
     else:
-        raise RuntimeError('Cannot find the data type!')
+        raise RuntimeError("Cannot find the data type!")
 
 
-def ttype2python_value(val:  any):
-    return (ttype2data_type[type(val)] if type(val) in ttype2data_type else DataType).ttype2python_type(val)
+def ttype2python_value(val: any):
+    return (
+        ttype2data_type[type(val)] if type(val) in ttype2data_type else DataType
+    ).ttype2python_type(val)
 
 
 def auto_convert_value_to_db_str(val: any):
     if isinstance(val, list):
         return f'[{", ".join([auto_convert_value_to_db_str(i) for i in val])}]'
-    return (python_type2data_type[type(val)] if type(val) in python_type2data_type else DataType).value2db_str(val)
+    return (
+        python_type2data_type[type(val)]
+        if type(val) in python_type2data_type
+        else DataType
+    ).value2db_str(val)
