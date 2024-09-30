@@ -60,7 +60,7 @@ nebula_servers='["192.168.1.10:9669"]'
 nebula_user_name=root
 nebula_password=1234
 nebula_max_connection_pool_size=10
-nebula_carina_paths='["example.models"]'
+nebula_model_paths='["example.models"]'
 nebula_default_space=main
 nebula_auto_create_default_space_with_vid_desc=FIXED_STRING(20)
 nebula_timezone_name=UTC
@@ -68,7 +68,7 @@ nebula_timezone_name=UTC
 
 You can export by:
 ```
-export nebula_carina_paths='["example.models"]' nebula_password=1234 nebula_servers='["192.168.1.10:9669"]' nebula_user_name=root nebula_default_space=main nebula_auto_create_default_space_with_vid_desc=FIXED_STRING(20)
+export nebula_model_paths='["example.models"]' nebula_password=1234 nebula_servers='["192.168.1.10:9669"]' nebula_user_name=root nebula_default_space=main nebula_auto_create_default_space_with_vid_desc=FIXED_STRING(20)
 ```
 
 ## Example
@@ -84,7 +84,7 @@ if main_space_name not in show_spaces():
 Or you can just set `nebula_auto_create_default_space_with_vid_desc=FIXED_STRING(20)` so that it will be automatically handled.
 
 ### Define Models
-Then, develop models defined in nebula_carina_paths.
+Then, develop models defined in nebula_model_paths.
 
 #### Schema Models
 * An TagModel is used to define a nebula tag.
