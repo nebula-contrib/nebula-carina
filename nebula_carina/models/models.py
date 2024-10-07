@@ -6,7 +6,6 @@ from typing import Iterable
 
 from nebula3.common.ttypes import Vertex, Tag, Edge
 from pydantic import BaseModel, StrictStr, StrictInt
-from pydantic.v1.fields import ModelField
 
 # Workaround form ModelMetaClass not being supposed to be used publicly
 # https://github.com/pydantic/pydantic/issues/6381
@@ -64,9 +63,9 @@ class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
     @classmethod
     def _create_db_fields(cls):
         return [
-            field_info.default.create_db_field(field_name)
+            field_info.create_db_field(field_name)
             for field_name, field_info in cls.model_fields.items()
-            if isinstance(field_info.default, NebulaFieldInfo)
+            if isinstance(field_info, NebulaFieldInfo)
         ]
 
     @classmethod
@@ -74,18 +73,18 @@ class NebulaSchemaModel(BaseModel, metaclass=NebulaSchemaModelMetaClass):
         return [
             field_name
             for field_name, field_info in cls.model_fields.items()
-            if isinstance(field_info.default, NebulaFieldInfo)
+            if isinstance(field_info, NebulaFieldInfo)
         ]
 
     def get_db_field_dict(self) -> dict[str, any]:
         return {
             field_name: field_info.data_type.value2db_str(getattr(self, field_name))
-            for field_name, field_info in self.__class__.model_fields.items()
-            if isinstance(field_info.default, NebulaFieldInfo)
+            for field_name, field_info in self.model_fields.items()
+            if isinstance(field_info, NebulaFieldInfo)
         }
 
     def get_db_field_value(self, field_name) -> str:
-        return self.__class__.model_fields[field_name].default.data_type.value2db_str(
+        return self.model_fields[field_name].data_type.value2db_str(
             getattr(self, field_name)
         )
 
@@ -232,13 +231,9 @@ class VertexModel(NebulaRecordModel):
         """
         return the iterator of tuple[name, tag model] of this class
         """
-        for name, field in cls.__fields__.items():
-            if (
-                isinstance(field, ModelField)
-                and isclass(field.type_)
-                and issubclass(field.type_, TagModel)
-            ):
-                yield name, field.type_, field.required
+        for name, field in cls.model_fields.items():
+            if isclass(field.annotation) and issubclass(field.annotation, TagModel):
+                yield name, field.annotation, field.is_required()
 
     @classmethod
     def get_tag_name2model(cls) -> dict[str, TagModel]:
@@ -287,14 +282,13 @@ class VertexModel(NebulaRecordModel):
         )
 
     def _get_tag_models(self):
-        for name, field in self.__class__.__fields__.items():
+        for name, field in self.model_fields.items():
             if (
-                isinstance(field, ModelField)
-                and isclass(field.type_)
-                and issubclass(field.type_, TagModel)
+                isclass(field.annotation)
+                and issubclass(field.annotation, TagModel)
                 and getattr(self, name, None)
             ):
-                yield name, field.type_
+                yield name, field.annotation
 
     def upsert(self):
         for name, tag_model in self._get_tag_models():
