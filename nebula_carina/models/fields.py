@@ -1,7 +1,6 @@
-from typing import Union, Any, Optional, TYPE_CHECKING, Type
+from typing import Union, Any, Optional, TYPE_CHECKING, Type, Callable
 
-from pydantic.v1.fields import FieldInfo
-from pydantic.v1.typing import NoArgAnyCallable
+from pydantic.fields import FieldInfo
 from nebula_carina.ngql.schema.data_types import DataType, FixedString
 from nebula_carina.ngql.statements.schema import SchemaField
 
@@ -9,6 +8,7 @@ from nebula_carina.ngql.statements.schema import SchemaField
 if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, MappingIntStrAny
 
+NoArgAnyCallable = Callable[[], Any]
 
 class NebulaFieldInfo(FieldInfo):
     """
