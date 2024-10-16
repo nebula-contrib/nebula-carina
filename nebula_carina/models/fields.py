@@ -26,10 +26,6 @@ class NebulaFieldInfo(FieldInfo):
             field_name, self.data_type, nullable=self.default is None,
             default=self.default if self.default is not Ellipsis else None, comment=self.description
         )
-    # Port usage from pydantic v1 temporary
-    def _validate(self) -> None:
-        if self.default is not PydanticUndefined and self.default_factory is not None:
-            raise ValueError('cannot specify both default and default_factory')
 
 
 def create_nebula_field(
@@ -91,5 +87,4 @@ def create_nebula_field(
         repr=repr,
         **extra,
     )
-    field_info._validate()
     return field_info
