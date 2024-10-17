@@ -1,7 +1,7 @@
-from typing import Union, Any, Optional, TYPE_CHECKING, Type
+from typing import Union, Any, Optional, TYPE_CHECKING, Type, Callable
 
-from pydantic.v1.fields import FieldInfo
-from pydantic.v1.typing import NoArgAnyCallable
+from pydantic.fields import FieldInfo
+from pydantic_core import PydanticUndefined
 from nebula_carina.ngql.schema.data_types import DataType, FixedString
 from nebula_carina.ngql.statements.schema import SchemaField
 
@@ -9,6 +9,7 @@ from nebula_carina.ngql.statements.schema import SchemaField
 if TYPE_CHECKING:
     from pydantic.typing import AbstractSetIntStr, MappingIntStrAny
 
+NoArgAnyCallable = Callable[[], Any]
 
 class NebulaFieldInfo(FieldInfo):
     """
@@ -16,8 +17,8 @@ class NebulaFieldInfo(FieldInfo):
     """
     __slots__ = ('data_type', )
 
-    def __init__(self, data_type: Union[DataType, Type[DataType]], default: Any = None, **kwargs: Any) -> None:
-        super().__init__(default, **kwargs)
+    def __init__(self, data_type: Union[DataType, Type[DataType]],  **kwargs: Any) -> None:
+        super().__init__(**kwargs)
         self.data_type = data_type if isinstance(data_type, DataType) else data_type()
 
     def create_db_field(self, field_name) -> SchemaField:
@@ -60,7 +61,7 @@ def create_nebula_field(
         max_length = data_type.max_length
     field_info = NebulaFieldInfo(
         data_type,
-        default,
+        default=default,
         default_factory=default_factory,
         alias=alias,
         title=title,
@@ -86,5 +87,4 @@ def create_nebula_field(
         repr=repr,
         **extra,
     )
-    field_info._validate()
     return field_info
