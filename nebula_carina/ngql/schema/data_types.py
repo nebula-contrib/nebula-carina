@@ -29,8 +29,11 @@ class DataType(metaclass=DataTypeMetaClass):
     nebula_ttype = None
     python_data_type = None
     is_data_type_for_auto_convert = False
+    class_override = None
 
     def __str__(self):
+        if self.class_override:
+            return pascal_case_to_snake_case(self.class_override.__name__).upper()
         return pascal_case_to_snake_case(self.__class__.__name__).upper()
 
     def __eq__(self, other):
@@ -114,6 +117,16 @@ class FixedString(DataType):
     @classmethod
     def value2db_str(cls, value):
         return 'NULL' if value is None else f'"{value}"'
+
+
+class JSONString(DataType):
+    def __init__(self):
+        super().__init__()
+        self.class_override = String
+
+    @classmethod
+    def value2db_str(cls, value):
+        return "NULL" if value is None else f"'{value}'"
 
 
 class Bool(DataType):
