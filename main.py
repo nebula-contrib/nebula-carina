@@ -2,7 +2,14 @@ from datetime import datetime
 
 from fastapi import FastAPI
 
-from example.models import VirtualCharacter, Love, Figure, Source, Support, LimitedCharacter
+from example.models import (
+    VirtualCharacter,
+    Love,
+    Figure,
+    Source,
+    Support,
+    LimitedCharacter,
+)
 from nebula_carina.models.migrations import make_migrations, migrate
 from nebula_carina.models.model_builder import ModelBuilder
 from nebula_carina.models.models import EdgeModel
@@ -14,8 +21,12 @@ from nebula_carina.ngql.statements.edge import EdgeValue
 
 app = FastAPI()
 
+
 @app.get("/")
 async def root():
+    pass
+    # rest = make_migrations()
+    # print(rest)
     # run_ngql('SHOW SPACES;')
     # print(show_spaces())
     # print(use_space('main'))
@@ -105,27 +116,32 @@ async def root():
     # ).save()
     # EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Love(way='gun', times=40)).save()
     # return EdgeModel.objects.find_between('char_test1', 'char_test2')
-    character1 = VirtualCharacter.objects.get('char_test1')
-    # LocalSession().session.release()
-    character2 = VirtualCharacter.objects.get('char_test2')
-    character1.get_out_edges(Love)
-    character2.get_reverse_edges(Love)
-    character1.get_out_edge_and_destinations(Love, VirtualCharacter)
-    character2.get_reverse_edge_and_sources(Love, VirtualCharacter)
-    VirtualCharacter.objects.find_destinations('char_test1', Love)
-    VirtualCharacter.objects.find_sources('char_test2', Love, distinct=False, limit=Limit(1))
-    character2.get_sources(Love, VirtualCharacter)
-    character1.get_destinations(Love, VirtualCharacter)
-    # return character1
-    # return rst
-    # return ModelBuilder.match(
-    #     '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter},
-    #     condition=Q(v__id__in=[112, 113]),
+    # character1 = VirtualCharacter.objects.get("char_test1")
+    # # LocalSession().session.release()
+    # character2 = VirtualCharacter.objects.get("char_test2")
+    # character1.get_out_edges(Love)
+    # character2.get_reverse_edges(Love)
+    # character1.get_out_edge_and_destinations(Love, VirtualCharacter)
+    # character2.get_reverse_edge_and_sources(Love, VirtualCharacter)
+    # VirtualCharacter.objects.find_destinations("char_test1", Love)
+    # VirtualCharacter.objects.find_sources(
+    #     "char_test2", Love, distinct=False, limit=Limit(1)
     # )
-    # EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Love(way='gun', times=40)).save()
-    return ModelBuilder.serialized_match(
-        '(v)-[e:love]->(v2)', {
-            'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter,
-        },
-        condition=Q(v__id="char_test1"),
-    )
+    # character2.get_sources(Love, VirtualCharacter)
+    # character1.get_destinations(Love, VirtualCharacter)
+    # # return character1
+    # # return rst
+    # # return ModelBuilder.match(
+    # #     '(v)-[e:love]->(v2)', {'v': VirtualCharacter, 'e': EdgeModel, 'v2': VirtualCharacter},
+    # #     condition=Q(v__id__in=[112, 113]),
+    # # )
+    # # EdgeModel(src_vid='char_test1', dst_vid='char_test2', ranking=0, edge_type=Love(way='gun', times=40)).save()
+    # return ModelBuilder.serialized_match(
+    #     "(v)-[e:love]->(v2)",
+    #     {
+    #         "v": VirtualCharacter,
+    #         "e": EdgeModel,
+    #         "v2": VirtualCharacter,
+    #     },
+    #     condition=Q(v__id="char_test1"),
+    # )
